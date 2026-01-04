@@ -290,7 +290,7 @@ export default function AdminDashboard() {
         setIsEditing(false);
         setIsAddingNew(false);
         setEditingItem(null);
-      } catch (error) {
+      } catch (error: any) {
         console.error('=== SAVE ERROR ===');
         console.error('Save blog error:', error);
         console.error('Error name:', error.name);
