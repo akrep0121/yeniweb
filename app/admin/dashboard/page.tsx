@@ -150,14 +150,23 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = async (id: string, type: 'blog' | 'comment') => {
+    console.log('handleDelete called with ID:', id, 'type:', type);
+
     if (type === 'blog') {
       try {
         const response = await fetch(`/api/blogs?id=${id}`, {
           method: 'DELETE'
         });
 
+        console.log('Delete response status:', response.status);
+        const data = await response.json();
+        console.log('Delete response data:', data);
+
         if (response.ok) {
           setBlogList(blogList.filter((item) => item.id !== id));
+          alert('Blog başarıyla silindi!');
+        } else {
+          alert('Silme işlemi başarısız: ' + (data.error || 'Bilinmeyen hata'));
         }
       } catch (error) {
         console.error('Delete blog error:', error);
