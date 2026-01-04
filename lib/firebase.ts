@@ -60,6 +60,12 @@ export async function getBlogs() {
     console.log('Blogs from Firebase:', firebaseBlogs.length);
     
     if (firebaseBlogs.length > 0) {
+      try {
+        await saveBlogsToFile(firebaseBlogs);
+        console.log('File storage synced with Firebase');
+      } catch (saveError) {
+        console.warn('Could not sync file storage with Firebase:', saveError);
+      }
       return firebaseBlogs;
     }
     
