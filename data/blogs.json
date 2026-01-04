@@ -13,7 +13,11 @@
     "images": [
       "https://images.unsplash.com/photo-1611974765270-ca1258634369?w=800",
       "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800"
-    ]
+    ],
+    "tags": ["Yatırım", "2024", "Portfolyo", "Strateji"],
+    "metaTitle": "2024 Yatırım Stratejisi - Soner Yılmaz",
+    "metaDescription": "Yeni yılda yatırım portfolyosunu nasıl optimize etmeniz gerektiğine dair detaylı analiz ve öneriler.",
+    "metaKeywords": ["yatırım", "strateji", "2024", "portfolyo", "finans"]
   },
   {
     "id": 2,
@@ -28,7 +32,11 @@
     "coverImage": "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=1200",
     "images": [
       "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=800"
-    ]
+    ],
+    "tags": ["Teknik Analiz", "Eğitim", "Grafik", "Göstergeler"],
+    "metaTitle": "Teknik Analiz Temelleri - Soner Yılmaz",
+    "metaDescription": "Grafik okuma ve teknik analiz konusunda başlangıç seviyesi rehber. Destek, direnç ve göstergeler.",
+    "metaKeywords": ["teknik analiz", "grafik", "eğitim", "göstergeler", "destek", "direnç"]
   },
   {
     "id": 3,
@@ -43,6 +51,10 @@
     "coverImage": "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200",
     "images": [
       "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=800"
-    ]
+    ],
+    "tags": ["Altın", "Emtia", "Yatırım", "2024"],
+    "metaTitle": "Altın Yatırımları ve Geleceği - Soner Yılmaz",
+    "metaDescription": "Geleneksel güvenli liman olarak altının 2024 beklentileri ve fiyat tahminleri.",
+    "metaKeywords": ["altın", "emtia", "yatırım", "2024", "fiyat tahmini"]
   }
 ]

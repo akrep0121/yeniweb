@@ -1,21 +1,49 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import blogs from '@/data/blogs.json';
-import { notFound } from 'next/navigation';
+import Tags from '@/components/Tags';
+import Comments from '@/components/Comments';
+import CommentForm from '@/components/CommentForm';
+import SocialShare from '@/components/SocialShare';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Calendar } from 'lucide-react';
-
-export async function generateStaticParams() {
-  return blogs.map((blog) => ({
-    slug: blog.slug,
-  }));
-}
+import { ArrowLeft, Clock, Calendar, Eye } from 'lucide-react';
+import comments from '@/data/comments.json';
 
 export default function BlogPost({ params }: { params: { slug: string } }) {
-  const blog = blogs.find((b) => b.slug === params.slug);
+  const [blogList, setBlogList] = useState<any[]>(blogs);
+  const [commentList, setCommentList] = useState<any[]>(comments);
+  const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
+
+  const blog = blogList.find((b: any) => b.slug === params.slug);
+
+  useEffect(() => {
+    if (blog) {
+      fetch(`/api/stats?slug=${blog.slug}&action=view`);
+    }
+  }, [blog]);
+
+  const handleCommentSubmit = (newComment: any) => {
+    const comment = {
+      ...newComment,
+      id: Date.now().toString(),
+      approved: false,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedComments = [...commentList, comment];
+    setCommentList(updatedComments);
+    localStorage.setItem('comments', JSON.stringify(updatedComments));
+  };
 
   if (!blog) {
-    notFound();
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">Blog yazısı bulunamadı</div>
+      </div>
+    );
   }
 
   return (
@@ -60,9 +88,22 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
               <span>{blog.readTime}</span>
             </div>
             <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              <span>{stats.blogViews[blog.slug] || 0} görüntülenme</span>
+            </div>
+            <div className="flex items-center gap-2">
               <span className="font-semibold">{blog.author}</span>
             </div>
           </div>
+
+          {blog.tags && blog.tags.length > 0 && (
+            <div className="mb-8">
+              <Tags
+                tags={blog.tags}
+                size="medium"
+              />
+            </div>
+          )}
 
           <div className="prose prose-invert prose-lg max-w-none">
             <div className="bg-gray-900 rounded-xl p-8 border border-gray-800">
@@ -71,6 +112,28 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </article>
+
+      <section className="py-12 bg-gradient-to-b from-gray-900 to-black">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <Comments blogId={blog.slug} comments={commentList} />
+              <div className="mt-8">
+                <CommentForm blogId={blog.slug} onCommentSubmit={handleCommentSubmit} />
+              </div>
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                <SocialShare
+                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}/blog/${blog.slug}`}
+                  title={blog.title}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer />
     </div>

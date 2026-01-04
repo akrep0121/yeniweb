@@ -13,6 +13,7 @@ interface BlogCardProps {
     publishedAt: string;
     readTime: string;
     coverImage?: string;
+    tags?: string[];
   };
 }
 
@@ -43,6 +44,16 @@ export default function BlogCard({ blog }: BlogCardProps) {
 
           <h3 className="text-xl font-bold text-white mb-3">{blog.title}</h3>
           <p className="text-gray-400 text-sm mb-4 flex-grow">{blog.excerpt}</p>
+
+          {blog.tags && blog.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-4">
+              {blog.tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-300">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-700">
             <div className="flex items-center gap-1 text-gray-500 text-sm">
