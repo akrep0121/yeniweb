@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, DocumentData, QueryDocumentSnapshot } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 
 const firebaseConfig = {
@@ -21,12 +20,14 @@ export { auth, db };
 
 export async function getBlogs() {
   try {
+    console.log('=== GET BLOGS (CLIENT SDK) CALLED ===');
     const blogsRef = collection(db, 'blogs');
     const snapshot = await getDocs(blogsRef);
-    const blogs = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() }));
+    const blogs = snapshot.docs.map((doc: QueryDocumentSnapshot) => ({ id: doc.id, ...doc.data() }));
+    console.log('Blogs loaded successfully (CLIENT SDK):', blogs.length);
     return blogs;
   } catch (error: any) {
-    console.error('getBlogs error:', error);
+    console.error('getBlogs error (CLIENT SDK):', error);
     return [];
   }
 }
@@ -40,16 +41,15 @@ export async function getBlogBySlug(slug: string) {
     const doc = snapshot.docs[0];
     return { id: doc.id, ...doc.data() };
   } catch (error: any) {
-    console.error('getBlogBySlug error:', error);
+    console.error('getBlogBySlug error (CLIENT SDK):', error);
     return null;
   }
 }
 
 export async function createBlog(blog: any) {
   try {
-    console.log('=== CREATE BLOG CALLED ===');
+    console.log('=== CREATE BLOG (CLIENT SDK) CALLED ===');
     console.log('Input blog data:', JSON.stringify(blog, null, 2));
-    console.log('Blog keys:', Object.keys(blog));
 
     const cleanedBlog: any = {};
     Object.keys(blog).forEach(key => {
@@ -62,16 +62,34 @@ export async function createBlog(blog: any) {
 
     console.log('Cleaned blog data:', JSON.stringify(cleanedBlog, null, 2));
 
+    console.log('=== BEFORE FIREBASE ADD DOC ===');
+    console.log('Firebase app instance:', getApps());
+    console.log('Firestore db instance:', db);
+    console.log('Collection reference:', collection(db, 'blogs'));
+
     const blogsRef = collection(db, 'blogs');
     const docRef = await addDoc(blogsRef, cleanedBlog);
-    console.log('Firebase document created with ID:', docRef.id);
 
-    return { id: docRef.id, ...blog };
+    console.log('=== AFTER FIREBASE ADD DOC ===');
+    console.log('Document reference (docRef):', docRef);
+    console.log('Document ID (docRef.id):', docRef.id);
+    console.log('Document ID type:', typeof docRef.id);
+    console.log('Document ID exists:', !!docRef.id);
+    console.log('Document ID null check:', docRef.id === null);
+    console.log('Document ID string:', String(docRef.id));
+    console.log('Document ID length:', docRef.id?.length);
+    console.log('Document ID value:', `"${docRef.id}"`);
+
+    const blogWithId = { id: docRef.id, ...blog };
+    console.log('Blog object to return:', JSON.stringify(blogWithId, null, 2));
+
+    return blogWithId;
   } catch (error: any) {
-    console.error('=== CREATE BLOG ERROR ===');
+    console.error('=== CREATE BLOG (CLIENT SDK) ERROR ===');
     console.error('Error name:', error.name);
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     console.error('Full error:', error);
     throw error;
   }
@@ -79,22 +97,40 @@ export async function createBlog(blog: any) {
 
 export async function updateBlog(id: string, blog: any) {
   try {
+    console.log('=== UPDATE BLOG (CLIENT SDK) CALLED ===');
+    console.log('Blog ID:', id);
+    console.log('Blog data:', JSON.stringify(blog, null, 2));
+
+    const cleanedBlog: any = {};
+    Object.keys(blog).forEach(key => {
+      if (blog[key] !== undefined && blog[key] !== null) {
+        cleanedBlog[key] = blog[key];
+      }
+    });
+
     const blogRef = doc(db, 'blogs', id);
-    await updateDoc(blogRef, blog);
+    await updateDoc(blogRef, cleanedBlog);
+    console.log('Blog updated successfully (CLIENT SDK)');
+
     return { id, ...blog };
   } catch (error: any) {
-    console.error('updateBlog error:', error);
+    console.error('updateBlog error (CLIENT SDK):', error);
     throw error;
   }
 }
 
 export async function deleteBlog(id: string) {
   try {
+    console.log('=== DELETE BLOG (CLIENT SDK) CALLED ===');
+    console.log('Blog ID to delete:', id);
+
     const blogRef = doc(db, 'blogs', id);
     await deleteDoc(blogRef);
+    console.log('Blog deleted successfully (CLIENT SDK)');
+
     return { success: true };
   } catch (error: any) {
-    console.error('deleteBlog error:', error);
+    console.error('deleteBlog error (CLIENT SDK):', error);
     throw error;
   }
 }
@@ -103,10 +139,10 @@ export async function getComments() {
   try {
     const commentsRef = collection(db, 'comments');
     const snapshot = await getDocs(commentsRef);
-    const comments = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() }));
+    const comments = snapshot.docs.map((doc: QueryDocumentSnapshot) => ({ id: doc.id, ...doc.data() }));
     return comments;
   } catch (error: any) {
-    console.error('getComments error:', error);
+    console.error('getComments error (CLIENT SDK):', error);
     return [];
   }
 }
@@ -116,10 +152,12 @@ export async function getCommentsByBlogId(blogId: string) {
     const commentsRef = collection(db, 'comments');
     const q = query(commentsRef, where('blogId', '==', blogId));
     const snapshot = await getDocs(q);
-    const comments = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() }));
+    const comments = snapshot.docs
+      .filter((doc: QueryDocumentSnapshot) => doc.data().blogId === blogId)
+      .map((doc: QueryDocumentSnapshot) => ({ id: doc.id, ...doc.data() }));
     return comments;
   } catch (error: any) {
-    console.error('getCommentsByBlogId error:', error);
+    console.error('getCommentsByBlogId error (CLIENT SDK):', error);
     return [];
   }
 }
@@ -130,7 +168,7 @@ export async function createComment(comment: any) {
     const docRef = await addDoc(commentsRef, comment);
     return { id: docRef.id, ...comment };
   } catch (error: any) {
-    console.error('createComment error:', error);
+    console.error('createComment error (CLIENT SDK):', error);
     throw error;
   }
 }
@@ -141,7 +179,7 @@ export async function updateComment(id: string, comment: any) {
     await updateDoc(commentRef, comment);
     return { id, ...comment };
   } catch (error: any) {
-    console.error('updateComment error:', error);
+    console.error('updateComment error (CLIENT SDK):', error);
     throw error;
   }
 }
@@ -152,7 +190,7 @@ export async function deleteComment(id: string) {
     await deleteDoc(commentRef);
     return { success: true };
   } catch (error: any) {
-    console.error('deleteComment error:', error);
+    console.error('deleteComment error (CLIENT SDK):', error);
     throw error;
   }
 }
