@@ -20,6 +20,7 @@ const db = getFirestore(app);
 export { auth, db };
 
 const BLOGS_FILE = path.join(process.cwd(), 'data', 'blogs.json');
+const COMMENTS_FILE = path.join(process.cwd(), 'data', 'comments.json');
 
 async function loadBlogsFromFile() {
   try {
@@ -248,12 +249,20 @@ export async function deleteBlog(id: string) {
 
 export async function getComments() {
   try {
+    console.log('=== GET COMMENTS CALLED ===');
+    console.log('Comments file path:', COMMENTS_FILE);
+    
     const fs = await import('fs');
-    const data = fs.default.readFileSync('./data/comments.json', 'utf-8');
+    const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
     const comments = JSON.parse(data);
+    console.log('Loaded comments:', comments.length);
     return comments;
   } catch (error: any) {
-    console.error('getComments error:', error);
+    console.error('=== GET COMMENTS ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     return [];
   }
 }
@@ -275,48 +284,81 @@ export async function getCommentsByBlogId(blogId: string) {
 
 export async function createComment(comment: any) {
   try {
+    console.log('=== CREATE COMMENT CALLED ===');
+    console.log('Comment data:', JSON.stringify(comment, null, 2));
+    console.log('Comments file path:', COMMENTS_FILE);
+    
     const fs = await import('fs');
-    const data = fs.default.readFileSync('./data/comments.json', 'utf-8');
+    const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
+    console.log('Raw comments data:', data);
+    
     const comments = JSON.parse(data);
+    console.log('Parsed comments:', comments.length);
+    
     const newComment = {
       ...comment,
       id: Date.now().toString()
     };
+    console.log('New comment:', newComment);
+    
     const updatedComments = [...comments, newComment];
-    fs.default.writeFileSync('./data/comments.json', JSON.stringify(updatedComments, null, 2), 'utf-8');
+    fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(updatedComments, null, 2), 'utf-8');
+    console.log('Comment saved successfully');
+    
     return newComment;
   } catch (error: any) {
-    console.error('createComment error:', error);
+    console.error('=== CREATE COMMENT ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 }
 
 export async function updateComment(id: string, comment: any) {
   try {
+    console.log('=== UPDATE COMMENT CALLED ===');
+    console.log('Comment ID:', id);
+    console.log('Comment data:', JSON.stringify(comment, null, 2));
+    
     const fs = await import('fs');
-    const data = fs.default.readFileSync('./data/comments.json', 'utf-8');
+    const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
     const comments = JSON.parse(data);
     const updatedComments = comments.map((c: any) => 
       c.id === id ? comment : c
     );
-    fs.default.writeFileSync('./data/comments.json', JSON.stringify(updatedComments, null, 2), 'utf-8');
+    fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(updatedComments, null, 2), 'utf-8');
+    console.log('Comment updated successfully');
     return { id, ...comment };
   } catch (error: any) {
-    console.error('updateComment error:', error);
+    console.error('=== UPDATE COMMENT ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 }
 
 export async function deleteComment(id: string) {
   try {
+    console.log('=== DELETE COMMENT CALLED ===');
+    console.log('Comment ID:', id);
+    
     const fs = await import('fs');
-    const data = fs.default.readFileSync('./data/comments.json', 'utf-8');
+    const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
     const comments = JSON.parse(data);
     const filteredComments = comments.filter((c: any) => c.id !== id);
-    fs.default.writeFileSync('./data/comments.json', JSON.stringify(filteredComments, null, 2), 'utf-8');
+    fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(filteredComments, null, 2), 'utf-8');
+    console.log('Comment deleted successfully');
     return { success: true };
   } catch (error: any) {
-    console.error('deleteComment error:', error);
+    console.error('=== DELETE COMMENT ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 }

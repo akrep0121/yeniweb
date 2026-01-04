@@ -24,15 +24,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== COMMENTS POST CALLED ===');
     const newComment = await request.json();
+    console.log('Received comment data:', JSON.stringify(newComment, null, 2));
 
     const createdComment = await createComment(newComment);
+    console.log('Created comment result:', createdComment);
 
     return NextResponse.json({ success: true, comment: createdComment });
   } catch (error: any) {
-    console.error('Comments POST error:', error);
+    console.error('=== COMMENTS POST ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', message: error.message },
       { status: 500 }
     );
   }
