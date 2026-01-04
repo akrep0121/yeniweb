@@ -30,12 +30,14 @@ interface Blog {
 
 export default function BlogPost({ params }: { params: { slug: string } }) {
   const [blog, setBlog] = useState<Blog | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [commentList, setCommentList] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
 
   useEffect(() => {
     const fetchBlog = async () => {
       try {
+        setIsLoading(true);
         console.log('=== FETCHING BLOG ===');
         console.log('Slug from params (raw):', params.slug);
         
@@ -70,12 +72,14 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
         console.log('Found blog title:', foundBlog?.title);
         
         setBlog(foundBlog || null);
+        setIsLoading(false);
 
         if (foundBlog) {
           fetch(`/api/stats?slug=${foundBlog.slug}&action=view`);
         }
       } catch (error) {
         console.error('Error fetching blog:', error);
+        setIsLoading(false);
       }
     };
 
@@ -116,6 +120,14 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
     setCommentList(updatedComments);
     localStorage.setItem('comments', JSON.stringify(updatedComments));
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">Yükleniyor...</div>
+      </div>
+    );
+  }
 
   if (!blog) {
     return (
