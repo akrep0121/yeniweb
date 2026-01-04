@@ -47,11 +47,32 @@ export async function getBlogBySlug(slug: string) {
 
 export async function createBlog(blog: any) {
   try {
+    console.log('=== CREATE BLOG CALLED ===');
+    console.log('Input blog data:', JSON.stringify(blog, null, 2));
+    console.log('Blog keys:', Object.keys(blog));
+
+    const cleanedBlog: any = {};
+    Object.keys(blog).forEach(key => {
+      if (blog[key] !== undefined && blog[key] !== null) {
+        cleanedBlog[key] = blog[key];
+      } else {
+        console.log(`Skipping undefined/null field: ${key}`);
+      }
+    });
+
+    console.log('Cleaned blog data:', JSON.stringify(cleanedBlog, null, 2));
+
     const blogsRef = collection(db, 'blogs');
-    const docRef = await addDoc(blogsRef, blog);
+    const docRef = await addDoc(blogsRef, cleanedBlog);
+    console.log('Firebase document created with ID:', docRef.id);
+
     return { id: docRef.id, ...blog };
   } catch (error: any) {
-    console.error('createBlog error:', error);
+    console.error('=== CREATE BLOG ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Full error:', error);
     throw error;
   }
 }

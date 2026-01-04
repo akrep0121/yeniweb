@@ -16,15 +16,25 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== API BLOGS POST CALLED ===');
     const newBlog = await request.json();
+    console.log('Received blog data:', JSON.stringify(newBlog, null, 2));
+    console.log('Blog ID:', newBlog.id);
+    console.log('Blog title:', newBlog.title);
+    console.log('Blog keys:', Object.keys(newBlog));
 
     const createdBlog = await createBlog(newBlog);
+    console.log('Created blog result:', JSON.stringify(createdBlog, null, 2));
 
     return NextResponse.json({ success: true, blog: createdBlog });
   } catch (error: any) {
-    console.error('Blogs POST error:', error);
+    console.error('=== BLOGS POST ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Full error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', message: error.message },
       { status: 500 }
     );
   }
