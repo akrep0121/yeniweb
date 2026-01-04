@@ -124,6 +124,10 @@ export default function AdminDashboard() {
       try {
         const response = await fetch('/api/blogs');
         const blogs = await response.json();
+        console.log('Loaded blogs:', blogs);
+        blogs.forEach((blog: any, index: number) => {
+          console.log(`Blog ${index} - ID:`, blog.id, 'Title:', blog.title);
+        });
         setBlogList(blogs);
       } catch (error) {
         console.error('Failed to load blogs:', error);
@@ -435,7 +439,12 @@ export default function AdminDashboard() {
                             <Edit className="w-4 h-4 text-white" />
                           </button>
                           <button
-                            onClick={() => handleDelete(blog.id, 'blog')}
+                            onClick={() => {
+                              console.log('Delete button clicked for blog:', blog);
+                              console.log('Blog ID:', blog.id);
+                              console.log('Blog Title:', blog.title);
+                              handleDelete(blog.id, 'blog');
+                            }}
                             className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all"
                           >
                             <Trash2 className="w-4 h-4 text-white" />
