@@ -90,23 +90,5 @@
       "2024",
       "fiyat tahmini"
     ]
-  },
-  {
-    "id": "4",
-    "type": "blog",
-    "title": "denem",
-    "slug": "",
-    "excerpt": "",
-    "content": "deneme",
-    "category": "Yatırım",
-    "publishedAt": "2026-01-04",
-    "author": "Soner Yılmaz",
-    "readTime": "5 dk",
-    "coverImage": "",
-    "images": [],
-    "tags": [],
-    "metaTitle": "",
-    "metaDescription": "",
-    "metaKeywords": []
   }
 ]

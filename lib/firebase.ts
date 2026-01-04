@@ -91,7 +91,7 @@ export async function createBlog(blog: any) {
 
     const cleanedBlog: any = {};
     Object.keys(blog).forEach(key => {
-      if (blog[key] !== undefined && blog[key] !== null && key !== 'id' && key !== 'type') {
+      if (blog[key] !== undefined && blog[key] !== null && blog[key] !== '' && key !== 'id' && key !== 'type') {
         cleanedBlog[key] = blog[key];
       }
     });
@@ -132,7 +132,7 @@ export async function updateBlog(id: string, blog: any) {
 
     const cleanedBlog: any = {};
     Object.keys(blog).forEach(key => {
-      if (blog[key] !== undefined && blog[key] !== null && key !== 'id' && key !== 'type') {
+      if (blog[key] !== undefined && blog[key] !== null && blog[key] !== '' && key !== 'id' && key !== 'type') {
         cleanedBlog[key] = blog[key];
       }
     });
