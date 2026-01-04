@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { getBlogs, syncToKV } from '@/lib/kv';
-
-const BLOGS_FILE = path.join(process.cwd(), 'data', 'blogs.json');
+import { getBlogs, createBlog, updateBlog, deleteBlog } from '@/lib/firebase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,12 +18,9 @@ export async function POST(request: NextRequest) {
   try {
     const newBlog = await request.json();
 
-    const blogs = await getBlogs();
-    const updatedBlogs = [...blogs, newBlog];
+    const createdBlog = await createBlog(newBlog);
 
-    await syncToKV(updatedBlogs);
-
-    return NextResponse.json({ success: true, blog: newBlog });
+    return NextResponse.json({ success: true, blog: createdBlog });
   } catch (error: any) {
     console.error('Blogs POST error:', error);
     return NextResponse.json(
@@ -41,21 +34,9 @@ export async function PUT(request: NextRequest) {
   try {
     const updatedBlog = await request.json();
 
-    const blogs = await getBlogs();
-    const index = blogs.findIndex((blog: any) => blog.id === updatedBlog.id);
+    const updated = await updateBlog(updatedBlog.id, updatedBlog);
 
-    if (index === -1) {
-      return NextResponse.json(
-        { error: 'Blog not found' },
-        { status: 404 }
-      );
-    }
-
-    blogs[index] = updatedBlog;
-
-    await syncToKV(blogs);
-
-    return NextResponse.json({ success: true, blog: updatedBlog });
+    return NextResponse.json({ success: true, blog: updated });
   } catch (error: any) {
     console.error('Blogs PUT error:', error);
     return NextResponse.json(
@@ -79,11 +60,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const blogs = await getBlogs();
-    const filteredBlogs = blogs.filter((blog: any) => String(blog.id) !== id);
-    console.log('After delete blogs count:', filteredBlogs.length);
-
-    await syncToKV(filteredBlogs);
+    await deleteBlog(id);
 
     return NextResponse.json({ success: true, message: 'Blog deleted successfully' });
   } catch (error: any) {

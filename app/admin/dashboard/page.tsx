@@ -18,11 +18,9 @@ import {
   Clock,
   XCircle
 } from 'lucide-react';
-import blogs from '@/data/blogs.json';
-import comments from '@/data/comments.json';
 
 interface Blog {
-  id: number;
+  id: string;
   title: string;
   slug: string;
   excerpt: string;
@@ -55,8 +53,8 @@ export default function AdminDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [blogList, setBlogList] = useState<Blog[]>(blogs);
-  const [commentList, setCommentList] = useState<Comment[]>(comments);
+  const [blogList, setBlogList] = useState<Blog[]>([]);
+  const [commentList, setCommentList] = useState<Comment[]>([]);
   const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
 
   useEffect(() => {
@@ -121,18 +119,41 @@ export default function AdminDashboard() {
     loadStats();
   }, []);
 
+  useEffect(() => {
+    const loadBlogs = async () => {
+      try {
+        const response = await fetch('/api/blogs');
+        const blogs = await response.json();
+        setBlogList(blogs);
+      } catch (error) {
+        console.error('Failed to load blogs:', error);
+      }
+    };
+
+    const loadComments = async () => {
+      try {
+        const response = await fetch('/api/comments');
+        const comments = await response.json();
+        setCommentList(comments);
+      } catch (error) {
+        console.error('Failed to load comments:', error);
+      }
+    };
+
+    loadBlogs();
+    loadComments();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     router.push('/admin');
   };
 
-  const handleDelete = async (id: number | string, type: 'blog' | 'comment') => {
+  const handleDelete = async (id: string, type: 'blog' | 'comment') => {
     if (type === 'blog') {
       try {
-        const response = await fetch('/api/blogs', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
+        const response = await fetch(`/api/blogs?id=${id}`, {
+          method: 'DELETE'
         });
 
         if (response.ok) {
@@ -167,7 +188,7 @@ export default function AdminDashboard() {
     setIsAddingNew(true);
     setIsEditing(true);
     setEditingItem({
-      id: Math.max(...blogList.map(b => b.id)) + 1,
+      id: '',
       type: 'blog',
       title: '',
       slug: '',

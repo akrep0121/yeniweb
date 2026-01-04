@@ -1,16 +1,34 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import BlogCard from '@/components/BlogCard';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
-import blogs from '@/data/blogs.json';
+
+interface Blog {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  publishedAt: string;
+  author: string;
+  readTime: string;
+  coverImage: string;
+  images: string[];
+  tags?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+}
 
 export default function Home() {
   const router = useRouter();
+  const [blogs, setBlogs] = useState<Blog[]>([]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -28,6 +46,20 @@ export default function Home() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [router]);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch('/api/blogs');
+        const data = await response.json();
+        setBlogs(data);
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
 
   return (
     <div className="min-h-screen">

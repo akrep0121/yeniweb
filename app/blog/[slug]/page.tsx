@@ -3,27 +3,76 @@
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import blogs from '@/data/blogs.json';
 import Tags from '@/components/Tags';
 import Comments from '@/components/Comments';
 import CommentForm from '@/components/CommentForm';
 import SocialShare from '@/components/SocialShare';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Calendar, Eye } from 'lucide-react';
-import comments from '@/data/comments.json';
+
+interface Blog {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  publishedAt: string;
+  author: string;
+  readTime: string;
+  coverImage: string;
+  images: string[];
+  tags?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+}
 
 export default function BlogPost({ params }: { params: { slug: string } }) {
-  const [blogList, setBlogList] = useState<any[]>(blogs);
-  const [commentList, setCommentList] = useState<any[]>(comments);
+  const [blog, setBlog] = useState<Blog | null>(null);
+  const [commentList, setCommentList] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
 
-  const blog = blogList.find((b: any) => b.slug === params.slug);
-
   useEffect(() => {
-    if (blog) {
-      fetch(`/api/stats?slug=${blog.slug}&action=view`);
-    }
-  }, [blog]);
+    const fetchBlog = async () => {
+      try {
+        const response = await fetch('/api/blogs');
+        const blogs = await response.json();
+        const foundBlog = blogs.find((b: Blog) => b.slug === params.slug);
+        setBlog(foundBlog || null);
+
+        if (foundBlog) {
+          fetch(`/api/stats?slug=${foundBlog.slug}&action=view`);
+        }
+      } catch (error) {
+        console.error('Error fetching blog:', error);
+      }
+    };
+
+    const fetchComments = async () => {
+      try {
+        const response = await fetch('/api/comments');
+        const comments = await response.json();
+        setCommentList(comments);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      }
+    };
+
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchBlog();
+    fetchComments();
+    fetchStats();
+  }, [params.slug]);
 
   const handleCommentSubmit = (newComment: any) => {
     const comment = {

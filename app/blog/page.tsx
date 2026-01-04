@@ -1,16 +1,48 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import BlogCard from '@/components/BlogCard';
 import SearchBar from '@/components/SearchBar';
 import Tags from '@/components/Tags';
 import Footer from '@/components/Footer';
-import blogs from '@/data/blogs.json';
+
+interface Blog {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  publishedAt: string;
+  author: string;
+  readTime: string;
+  coverImage: string;
+  images: string[];
+  tags?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
+}
 
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTag, setActiveTag] = useState('');
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch('/api/blogs');
+        const data = await response.json();
+        setBlogs(data);
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
 
   const allTags = useMemo(() => {
     const tagCounts = new Map<string, number>();
