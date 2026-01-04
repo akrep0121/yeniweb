@@ -36,9 +36,30 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
+        console.log('=== FETCHING BLOG ===');
+        console.log('Slug from params:', params.slug);
+        
         const response = await fetch('/api/blogs');
         const blogs = await response.json();
+        console.log('All blogs:', blogs);
+        console.log('Blogs length:', Array.isArray(blogs) ? blogs.length : 'not array');
+        
+        if (Array.isArray(blogs)) {
+          blogs.forEach((b: Blog, i: number) => {
+            console.log(`Blog ${i}:`, {
+              id: b.id,
+              title: b.title,
+              slug: b.slug,
+              slugType: typeof b.slug
+            });
+          });
+        }
+        
         const foundBlog = blogs.find((b: Blog) => b.slug === params.slug);
+        console.log('Found blog:', foundBlog);
+        console.log('Found blog ID:', foundBlog?.id);
+        console.log('Found blog title:', foundBlog?.title);
+        
         setBlog(foundBlog || null);
 
         if (foundBlog) {

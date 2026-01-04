@@ -46,6 +46,15 @@ function getNextBlogId() {
   return Date.now().toString();
 }
 
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') + '-' + Date.now().toString().slice(-4);
+}
+
 export async function getBlogs() {
   try {
     console.log('=== GET BLOGS (FIREBASE + FILE) CALLED ===');
@@ -102,6 +111,16 @@ export async function createBlog(blog: any) {
       }
     });
 
+    if (!cleanedBlog.slug || cleanedBlog.slug === '') {
+      if (cleanedBlog.title) {
+        cleanedBlog.slug = generateSlug(cleanedBlog.title);
+        console.log('Generated slug from title:', cleanedBlog.slug);
+      } else {
+        cleanedBlog.slug = 'blog-' + Date.now();
+        console.log('Generated default slug:', cleanedBlog.slug);
+      }
+    }
+
     console.log('Cleaned blog data:', JSON.stringify(cleanedBlog, null, 2));
 
     const blogsRef = collection(db, 'blogs');
@@ -142,6 +161,16 @@ export async function updateBlog(id: string, blog: any) {
         cleanedBlog[key] = blog[key];
       }
     });
+
+    if (!cleanedBlog.slug || cleanedBlog.slug === '') {
+      if (cleanedBlog.title) {
+        cleanedBlog.slug = generateSlug(cleanedBlog.title);
+        console.log('Generated slug from title:', cleanedBlog.slug);
+      } else {
+        cleanedBlog.slug = 'blog-' + Date.now();
+        console.log('Generated default slug:', cleanedBlog.slug);
+      }
+    }
 
     const blogRef = doc(db, 'blogs', id);
     await updateDoc(blogRef, cleanedBlog);
