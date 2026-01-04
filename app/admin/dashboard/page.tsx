@@ -126,9 +126,22 @@ export default function AdminDashboard() {
     router.push('/admin');
   };
 
-  const handleDelete = (id: number | string, type: 'blog' | 'comment') => {
+  const handleDelete = async (id: number | string, type: 'blog' | 'comment') => {
     if (type === 'blog') {
-      setBlogList(blogList.filter((item) => item.id !== id));
+      try {
+        const response = await fetch('/api/blogs', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+
+        if (response.ok) {
+          setBlogList(blogList.filter((item) => item.id !== id));
+        }
+      } catch (error) {
+        console.error('Delete blog error:', error);
+        alert('Silme işlemi başarısız!');
+      }
     } else {
       setCommentList(commentList.filter((item) => item.id !== id));
     }
@@ -173,19 +186,53 @@ export default function AdminDashboard() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isAddingNew) {
-      setBlogList([...blogList, editingItem]);
+      try {
+        const response = await fetch('/api/blogs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingItem)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setBlogList([...blogList, data.blog]);
+          setIsEditing(false);
+          setIsAddingNew(false);
+          setEditingItem(null);
+        } else {
+          alert('Ekleme işlemi başarısız!');
+        }
+      } catch (error) {
+        console.error('Save blog error:', error);
+        alert('Kaydetme işlemi başarısız!');
+      }
     } else if (editingItem.type === 'blog') {
-      setBlogList(
-        blogList.map((item) =>
-          item.id === editingItem.id ? editingItem : item
-        )
-      );
+      try {
+        const response = await fetch('/api/blogs', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingItem)
+        });
+
+        if (response.ok) {
+          setBlogList(
+            blogList.map((item) =>
+              item.id === editingItem.id ? editingItem : item
+            )
+          );
+          setIsEditing(false);
+          setIsAddingNew(false);
+          setEditingItem(null);
+        } else {
+          alert('Güncelleme işlemi başarısız!');
+        }
+      } catch (error) {
+        console.error('Save blog error:', error);
+        alert('Kaydetme işlemi başarısız!');
+      }
     }
-    setIsEditing(false);
-    setIsAddingNew(false);
-    setEditingItem(null);
   };
 
   const handleCancel = () => {
