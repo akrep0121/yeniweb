@@ -18,16 +18,16 @@ export default function Hero() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="#portfolyo"
+            href="/blog"
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
           >
-            Portfolyom <ArrowRight className="w-5 h-5" />
+            Blog Yazılarım <ArrowRight className="w-5 h-5" />
           </a>
           <a
-            href="/blog"
+            href="#iletisim"
             className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-4 rounded-lg font-semibold transition-all"
           >
-            Blog Yazılarım
+            İletişim
           </a>
         </div>
 
