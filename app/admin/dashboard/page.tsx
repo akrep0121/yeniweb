@@ -221,17 +221,29 @@ export default function AdminDashboard() {
   };
 
   const handleSave = async () => {
+    console.log('=== HANDLE SAVE CALLED ===');
+    console.log('isAddingNew:', isAddingNew);
+    console.log('editingItem:', JSON.stringify(editingItem, null, 2));
+
     if (isAddingNew) {
       try {
+        console.log('Sending POST request to /api/blogs');
         const response = await fetch('/api/blogs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(editingItem)
         });
 
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', JSON.stringify(data, null, 2));
+        console.log('Saved blog object:', JSON.stringify(data.blog, null, 2));
+        console.log('Saved blog ID:', data.blog?.id);
+
         if (response.ok) {
-          const data = await response.json();
+          console.log('Adding blog to list. Current count:', blogList.length);
           setBlogList([...blogList, data.blog]);
+          console.log('New blog list count:', blogList.length + 1);
           setIsEditing(false);
           setIsAddingNew(false);
           setEditingItem(null);
