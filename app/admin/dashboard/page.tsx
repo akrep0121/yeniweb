@@ -7,8 +7,6 @@ import Footer from '@/components/Footer';
 import {
   LayoutDashboard,
   FileText,
-  TrendingUp,
-  Settings,
   LogOut,
   Plus,
   Edit,
@@ -40,13 +38,16 @@ interface Blog {
   publishedAt: string;
   author: string;
   readTime: string;
+  coverImage: string;
+  images: string[];
 }
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'investments' | 'blogs'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'blogs'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [isAddingNew, setIsAddingNew] = useState(false);
   const [investmentList, setInvestmentList] = useState<Investment[]>(investments);
   const [blogList, setBlogList] = useState<Blog[]>(blogs);
 
@@ -74,11 +75,33 @@ export default function AdminDashboard() {
 
   const handleEdit = (item: any, type: 'investment' | 'blog') => {
     setIsEditing(true);
+    setIsAddingNew(false);
     setEditingItem({ ...item, type });
   };
 
+  const handleAddNewBlog = () => {
+    setIsAddingNew(true);
+    setIsEditing(true);
+    setEditingItem({
+      id: Math.max(...blogList.map(b => b.id)) + 1,
+      type: 'blog',
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '',
+      category: 'Yatırım',
+      publishedAt: new Date().toISOString().split('T')[0],
+      author: 'Soner Yılmaz',
+      readTime: '5 dk',
+      coverImage: '',
+      images: []
+    });
+  };
+
   const handleSave = () => {
-    if (editingItem.type === 'investment') {
+    if (isAddingNew) {
+      setBlogList([...blogList, editingItem]);
+    } else if (editingItem.type === 'investment') {
       setInvestmentList(
         investmentList.map((item) =>
           item.id === editingItem.id ? editingItem : item
@@ -92,11 +115,13 @@ export default function AdminDashboard() {
       );
     }
     setIsEditing(false);
+    setIsAddingNew(false);
     setEditingItem(null);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+    setIsAddingNew(false);
     setEditingItem(null);
   };
 
@@ -133,17 +158,6 @@ export default function AdminDashboard() {
                     Genel Bakış
                   </button>
                   <button
-                    onClick={() => setActiveTab('investments')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                      activeTab === 'investments'
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                    }`}
-                  >
-                    <TrendingUp className="w-5 h-5" />
-                    Yatırımlar
-                  </button>
-                  <button
                     onClick={() => setActiveTab('blogs')}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       activeTab === 'blogs'
@@ -160,11 +174,7 @@ export default function AdminDashboard() {
 
             <div className="lg:col-span-3">
               {activeTab === 'overview' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/50 rounded-xl p-6 border border-blue-700">
-                    <h3 className="text-gray-400 mb-2">Toplam Yatırım</h3>
-                    <p className="text-3xl font-bold text-white">{investmentList.length}</p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div className="bg-gradient-to-br from-green-900/50 to-green-800/50 rounded-xl p-6 border border-green-700">
                     <h3 className="text-gray-400 mb-2">Blog Yazısı</h3>
                     <p className="text-3xl font-bold text-white">{blogList.length}</p>
@@ -176,54 +186,14 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {activeTab === 'investments' && (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-white">Yatırımlar</h2>
-                    <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
-                      <Plus className="w-4 h-4" />
-                      Yeni Ekle
-                    </button>
-                  </div>
-
-                  {investmentList.map((investment) => (
-                    <div
-                      key={investment.id}
-                      className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 border border-gray-700"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-xl font-bold text-white">{investment.name}</h3>
-                          <p className="text-gray-400">{investment.symbol} - {investment.type}</p>
-                          <p className="text-sm text-gray-500 mt-2">
-                            Giriş: ${investment.entryPrice} | Güncel: ${investment.currentPrice} | Miktar: {investment.quantity}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(investment, 'investment')}
-                            className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all"
-                          >
-                            <Edit className="w-4 h-4 text-white" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(investment.id, 'investment')}
-                            className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all"
-                          >
-                            <Trash2 className="w-4 h-4 text-white" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {activeTab === 'blogs' && (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-white">Blog Yazıları</h2>
-                    <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
+                    <button
+                      onClick={handleAddNewBlog}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all"
+                    >
                       <Plus className="w-4 h-4" />
                       Yeni Ekle
                     </button>
@@ -271,9 +241,9 @@ export default function AdminDashboard() {
 
       {isEditing && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border border-gray-700 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Düzenle</h2>
+              <h2 className="text-2xl font-bold text-white">{isAddingNew ? 'Yeni Blog Yazısı' : 'Düzenle'}</h2>
               <button
                 onClick={handleCancel}
                 className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-all"
@@ -285,6 +255,43 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               {Object.keys(editingItem).map((key) => {
                 if (key === 'type' || key === 'id') return null;
+
+                if (key === 'images' && Array.isArray(editingItem[key])) {
+                  return (
+                    <div key={key}>
+                      <label className="block text-gray-400 mb-2 capitalize">İçerik Resimleri (virgülle ayırın)</label>
+                      <input
+                        type="text"
+                        value={editingItem[key].join(', ')}
+                        onChange={(e) => {
+                          const urls = e.target.value.split(',').map(url => url.trim()).filter(url => url.length > 0);
+                          setEditingItem({
+                            ...editingItem,
+                            [key]: urls
+                          });
+                        }}
+                        placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                  );
+                }
+
+                if (key === 'content') {
+                  return (
+                    <div key={key}>
+                      <label className="block text-gray-400 mb-2 capitalize">{key}</label>
+                      <textarea
+                        value={editingItem[key]}
+                        onChange={(e) => setEditingItem({ ...editingItem, [key]: e.target.value })}
+                        rows={8}
+                        placeholder="Markdown formatında içerik girin..."
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none resize-none"
+                      />
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={key}>
                     <label className="block text-gray-400 mb-2 capitalize">{key}</label>
@@ -298,6 +305,13 @@ export default function AdminDashboard() {
                         })
                       }
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                      placeholder={
+                        key === 'coverImage' ? 'https://example.com/cover-image.jpg' :
+                        key === 'slug' ? 'blog-yazisi-slug' :
+                        key === 'category' ? 'Yatırım' :
+                        key === 'readTime' ? '5 dk' :
+                        undefined
+                      }
                     />
                   </div>
                 );

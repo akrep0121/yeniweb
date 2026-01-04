@@ -4,11 +4,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
-import InvestmentCard from '@/components/InvestmentCard';
 import BlogCard from '@/components/BlogCard';
 import ContactForm from '@/components/ContactForm';
 import Footer from '@/components/Footer';
-import investments from '@/data/investments.json';
 import blogs from '@/data/blogs.json';
 
 export default function Home() {
@@ -36,22 +34,7 @@ export default function Home() {
       <Header />
       <Hero />
 
-      <section id="portfolyo" className="py-20 bg-gradient-to-b from-black to-gray-900">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-white text-center mb-4">Yatırım Portfolyom</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-            Hisse senetleri, kripto paralar ve emtialar çeşitlendirilmiş portfolyo
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {investments.map((investment) => (
-              <InvestmentCard key={investment.id} investment={investment} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+      <section className="py-20 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
             <div>

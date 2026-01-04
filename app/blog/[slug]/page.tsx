@@ -32,6 +32,16 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
             Blog'a Dön
           </Link>
 
+          {blog.coverImage && (
+            <div className="mb-8 rounded-2xl overflow-hidden">
+              <img
+                src={blog.coverImage}
+                alt={blog.title}
+                className="w-full h-[400px] object-cover"
+              />
+            </div>
+          )}
+
           <div className="mb-8">
             <span className="text-xs px-3 py-1 rounded-full bg-blue-600 text-white font-semibold">
               {blog.category}
