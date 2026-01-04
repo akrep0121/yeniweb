@@ -16,7 +16,8 @@ import {
   X,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  Mail
 } from 'lucide-react';
 
 interface Blog {
@@ -47,14 +48,24 @@ interface Comment {
   approved: boolean;
 }
 
+interface Message {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'blogs' | 'comments'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'blogs' | 'comments' | 'messages'>('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [blogList, setBlogList] = useState<Blog[]>([]);
   const [commentList, setCommentList] = useState<Comment[]>([]);
+  const [messageList, setMessageList] = useState<Message[]>([]);
   const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
 
   useEffect(() => {
@@ -148,8 +159,19 @@ export default function AdminDashboard() {
       }
     };
 
+    const loadMessages = async () => {
+      try {
+        const response = await fetch('/api/messages');
+        const messages = await response.json();
+        setMessageList(messages);
+      } catch (error) {
+        console.error('Failed to load messages:', error);
+      }
+    };
+
     loadBlogs();
     loadComments();
+    loadMessages();
   }, []);
 
   const handleLogout = () => {
@@ -231,6 +253,45 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Delete comment error:', error);
+      alert('Bir hata oluştu!');
+    }
+  };
+
+  const handleReadMessage = async (messageId: string) => {
+    try {
+      const message = messageList.find(m => m.id === messageId);
+      if (!message) return;
+
+      const response = await fetch('/api/messages', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...message, read: true })
+      });
+
+      if (response.ok) {
+        setMessageList(messageList.map(m =>
+          m.id === messageId ? { ...m, read: true } : m
+        ));
+      }
+    } catch (error) {
+      console.error('Read message error:', error);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const response = await fetch(`/api/messages?id=${messageId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setMessageList(messageList.filter(m => m.id !== messageId));
+        alert('Mesaj silindi!');
+      } else {
+        alert('Mesaj silinemedi!');
+      }
+    } catch (error) {
+      console.error('Delete message error:', error);
       alert('Bir hata oluştu!');
     }
   };
@@ -444,6 +505,17 @@ export default function AdminDashboard() {
                     <CheckCircle className="w-5 h-5" />
                     Yorumlar
                   </button>
+                  <button
+                    onClick={() => setActiveTab('messages')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                      activeTab === 'messages'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                    }`}
+                  >
+                    <Mail className="w-5 h-5" />
+                    İletişim Mesajları
+                  </button>
                 </nav>
               </div>
             </div>
@@ -639,6 +711,79 @@ export default function AdminDashboard() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {activeTab === 'messages' && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold text-white">İletişim Mesajları</h2>
+                    <div className="flex gap-4 text-sm text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        Okunmuş: {messageList.filter(m => m.read).length}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 text-yellow-600" />
+                        Okunmamış: {messageList.filter(m => !m.read).length}
+                      </span>
+                    </div>
+                  </div>
+
+                  {messageList.length === 0 && (
+                    <div className="bg-gray-800 rounded-xl p-8 border border-gray-700 text-center">
+                      <p className="text-gray-400">Henüz mesaj yok</p>
+                    </div>
+                  )}
+
+                  {messageList.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl p-6 border ${
+                        message.read ? 'border-gray-700' : 'border-blue-700'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {message.read ? (
+                              <CheckCircle className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <Clock className="w-5 h-5 text-blue-500" />
+                            )}
+                            <span className="font-semibold text-white">{message.name}</span>
+                            <span className="text-sm text-gray-500">{message.email}</span>
+                            <span className="text-sm text-gray-500">
+                              {new Date(message.createdAt).toLocaleDateString('tr-TR')}
+                            </span>
+                          </div>
+                          <p className="text-gray-300 leading-relaxed mb-2">{message.message}</p>
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                          {!message.read && (
+                            <button
+                              onClick={() => handleReadMessage(message.id)}
+                              className="p-2 bg-green-600 hover:bg-green-700 rounded-lg transition-all"
+                              title="Okundu Olarak İşaretle"
+                            >
+                              <CheckCircle className="w-4 h-4 text-white" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (confirm('Bu mesajı silmek istediğinizden emin misiniz?')) {
+                                handleDeleteMessage(message.id);
+                              }
+                            }}
+                            className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all"
+                            title="Sil"
+                          >
+                            <Trash2 className="w-4 h-4 text-white" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

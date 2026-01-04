@@ -10,10 +10,26 @@ export default function ContactForm() {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Mesajınız başarıyla gönderildi!');
-    setFormData({ name: '', email: '', message: '' });
+    
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        alert('Mesajınız başarıyla gönderildi!');
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        alert('Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+    }
   };
 
   return (
