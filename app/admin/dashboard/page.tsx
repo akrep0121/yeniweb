@@ -192,14 +192,47 @@ export default function AdminDashboard() {
     setEditingItem({ ...item, type });
   };
 
-  const handleApproveComment = (commentId: string) => {
-    setCommentList(commentList.map(c =>
-      c.id === commentId ? { ...c, approved: true } : c
-    ));
+  const handleApproveComment = async (commentId: string) => {
+    try {
+      const comment = commentList.find(c => c.id === commentId);
+      if (!comment) return;
+
+      const response = await fetch('/api/comments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...comment, approved: true })
+      });
+
+      if (response.ok) {
+        setCommentList(commentList.map(c =>
+          c.id === commentId ? { ...c, approved: true } : c
+        ));
+        alert('Yorum onaylandı!');
+      } else {
+        alert('Yorum onaylanamadı!');
+      }
+    } catch (error) {
+      console.error('Approve comment error:', error);
+      alert('Bir hata oluştu!');
+    }
   };
 
-  const handleRejectComment = (commentId: string) => {
-    setCommentList(commentList.filter(c => c.id !== commentId));
+  const handleRejectComment = async (commentId: string) => {
+    try {
+      const response = await fetch(`/api/comments?id=${commentId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setCommentList(commentList.filter(c => c.id !== commentId));
+        alert('Yorum silindi!');
+      } else {
+        alert('Yorum silinemedi!');
+      }
+    } catch (error) {
+      console.error('Delete comment error:', error);
+      alert('Bir hata oluştu!');
+    }
   };
 
   const handleAddNewBlog = () => {

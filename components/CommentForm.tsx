@@ -64,14 +64,27 @@ export default function CommentForm({ blogId, onCommentSubmit }: CommentFormProp
     setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       const newComment = {
         blogId,
         name: formData.name.trim(),
         email: formData.email.trim(),
-        comment: formData.comment.trim()
+        comment: formData.comment.trim(),
+        approved: false,
+        createdAt: new Date().toISOString()
       };
+
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newComment)
+      });
+
+      if (!response.ok) {
+        throw new Error('Yorum gönderilemedi');
+      }
+
+      const data = await response.json();
+      console.log('Comment saved to server:', data);
 
       onCommentSubmit(newComment);
 
@@ -80,6 +93,7 @@ export default function CommentForm({ blogId, onCommentSubmit }: CommentFormProp
 
       setTimeout(() => setSuccess(false), 5000);
     } catch (error) {
+      console.error('Comment submit error:', error);
       setError('Bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
