@@ -90,7 +90,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.nextUrl);
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
     console.log('DELETE request - ID:', id);
@@ -113,7 +113,7 @@ export async function DELETE(request: NextRequest) {
     const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
     console.log('Current blogs count:', blogsData.length);
 
-    const filteredBlogs = blogsData.filter((blog: any) => blog.id !== parseInt(id));
+    const filteredBlogs = blogsData.filter((blog: any) => String(blog.id) !== id);
     console.log('After delete blogs count:', filteredBlogs.length);
 
     fs.writeFileSync(BLOGS_FILE, JSON.stringify(filteredBlogs, null, 2));
