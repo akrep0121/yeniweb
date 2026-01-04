@@ -1,8 +1,45 @@
 'use client';
 
 import { ArrowRight, Github, Twitter } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+const paragraphs = [
+  "Hisse senedi, kripto para ve emtia piyasalarıyla uzun yıllardır ilgileniyorum.",
+  "Bu platformda; kendi yatırım felsefemi, piyasalarla ilgili düşüncelerimi ve yaptığım işlemlerden edindiğim deneyimleri paylaşıyorum.",
+  "Blog yazılarım ve sosyal medya paylaşımlarım bilgilendirme amaçlıdır."
+];
 
 export default function Hero() {
+  const [displayedText, setDisplayedText] = useState<string[]>(['', '', '']);
+  const [currentParagraph, setCurrentParagraph] = useState(0);
+  const [currentChar, setCurrentChar] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    if (currentParagraph < paragraphs.length) {
+      if (currentChar < paragraphs[currentParagraph].length) {
+        const typingSpeed = 30;
+        const timer = setTimeout(() => {
+          const newTexts = [...displayedText];
+          newTexts[currentParagraph] = paragraphs[currentParagraph].substring(0, currentChar + 1);
+          setDisplayedText(newTexts);
+          setCurrentChar(currentChar + 1);
+        }, typingSpeed);
+
+        return () => clearTimeout(timer);
+      } else {
+        const delayTimer = setTimeout(() => {
+          setCurrentParagraph(currentParagraph + 1);
+          setCurrentChar(0);
+        }, 800);
+
+        return () => clearTimeout(delayTimer);
+      }
+    } else {
+      setIsTyping(false);
+    }
+  }, [currentParagraph, currentChar, displayedText]);
+
   return (
     <section className="min-h-screen flex items-center justify-center pt-20 bg-gradient-to-b from-black via-gray-900 to-black">
       <div className="container mx-auto px-4 text-center">
@@ -12,15 +49,19 @@ export default function Hero() {
         <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto">
           Profesyonel Yatırımcı & Finans Uzmanı
         </p>
-        <p className="text-lg text-gray-500 mb-12 max-w-3xl mx-auto">
-          Hisse senedi, kripto para ve emtia piyasalarıyla uzun yıllardır ilgileniyorum.
-        </p>
-        <p className="text-lg text-gray-500 mb-12 max-w-3xl mx-auto">
-          Bu platformda; kendi yatırım felsefemi, piyasalarla ilgili düşüncelerimi ve yaptığım işlemlerden edindiğim deneyimleri paylaşıyorum.
-        </p>
-        <p className="text-lg text-gray-500 mb-12 max-w-3xl mx-auto">
-          Blog yazılarım ve sosyal medya paylaşımlarım bilgilendirme amaçlıdır.
-        </p>
+        {paragraphs.map((_, index) => (
+          <p 
+            key={index} 
+            className={`text-lg text-gray-500 mb-12 max-w-3xl mx-auto min-h-[4.5rem] ${
+              index <= currentParagraph ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {displayedText[index]}
+            {index === currentParagraph && isTyping && (
+              <span className="animate-pulse">|</span>
+            )}
+          </p>
+        ))}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
             href="/blog"
