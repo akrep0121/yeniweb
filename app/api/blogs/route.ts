@@ -58,25 +58,39 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    console.log('=== API BLOGS DELETE CALLED ===');
     const { searchParams } = new URL(request.nextUrl);
     const id = searchParams.get('id');
 
+    console.log('URL:', request.nextUrl);
+    console.log('URL searchParams:', searchParams.toString());
     console.log('DELETE request - ID:', id);
+    console.log('ID type:', typeof id);
+    console.log('ID length:', id?.length);
+    console.log('ID value:', id ? `"${id}"` : 'undefined');
 
     if (!id) {
+      console.error('Blog ID is missing or empty');
       return NextResponse.json(
-        { error: 'Blog ID is required' },
+        { error: 'Blog ID is required', debug: { url: request.nextUrl, id } },
         { status: 400 }
       );
     }
 
-    await deleteBlog(id);
+    console.log('Calling deleteBlog function with ID:', id);
+    const result = await deleteBlog(id);
+    console.log('deleteBlog result:', result);
 
     return NextResponse.json({ success: true, message: 'Blog deleted successfully' });
   } catch (error: any) {
-    console.error('Blogs DELETE error:', error);
+    console.error('=== BLOGS DELETE ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
+    console.error('Full error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', message: error.message, code: error.code },
       { status: 500 }
     );
   }
