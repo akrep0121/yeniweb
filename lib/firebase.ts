@@ -250,12 +250,31 @@ export async function deleteBlog(id: string) {
 export async function getComments() {
   try {
     console.log('=== GET COMMENTS CALLED ===');
-    console.log('Comments file path:', COMMENTS_FILE);
+    
+    const commentsRef = collection(db, 'comments');
+    const querySnapshot = await getDocs(commentsRef);
+    const firebaseComments: any[] = [];
+    querySnapshot.forEach((doc) => {
+      firebaseComments.push({ id: doc.id, ...doc.data() });
+    });
+    
+    console.log('Comments from Firebase:', firebaseComments.length);
+    
+    if (firebaseComments.length > 0) {
+      try {
+        const fs = await import('fs');
+        fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(firebaseComments, null, 2), 'utf-8');
+        console.log('File storage synced with Firebase');
+      } catch (saveError) {
+        console.warn('Could not sync file storage with Firebase:', saveError);
+      }
+      return firebaseComments;
+    }
     
     const fs = await import('fs');
     const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
     const comments = JSON.parse(data);
-    console.log('Loaded comments:', comments.length);
+    console.log('Comments from file (fallback):', comments.length);
     return comments;
   } catch (error: any) {
     console.error('=== GET COMMENTS ERROR ===');
@@ -286,25 +305,33 @@ export async function createComment(comment: any) {
   try {
     console.log('=== CREATE COMMENT CALLED ===');
     console.log('Comment data:', JSON.stringify(comment, null, 2));
-    console.log('Comments file path:', COMMENTS_FILE);
+
+    const cleanedComment: any = {};
+    Object.keys(comment).forEach(key => {
+      if (comment[key] !== undefined && comment[key] !== null && comment[key] !== '' && key !== 'id') {
+        cleanedComment[key] = comment[key];
+      }
+    });
+
+    const commentsRef = collection(db, 'comments');
+    const docRef = await addDoc(commentsRef, cleanedComment);
     
-    const fs = await import('fs');
-    const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
-    console.log('Raw comments data:', data);
+    console.log('=== FIREBASE COMMENT CREATED ===');
+    console.log('Comment ID:', docRef.id);
+
+    const newComment = { id: docRef.id, ...cleanedComment };
     
-    const comments = JSON.parse(data);
-    console.log('Parsed comments:', comments.length);
-    
-    const newComment = {
-      ...comment,
-      id: Date.now().toString()
-    };
-    console.log('New comment:', newComment);
-    
-    const updatedComments = [...comments, newComment];
-    fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(updatedComments, null, 2), 'utf-8');
-    console.log('Comment saved successfully');
-    
+    try {
+      const fs = await import('fs');
+      const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
+      const comments = JSON.parse(data);
+      const updatedComments = [...comments, newComment];
+      fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(updatedComments, null, 2), 'utf-8');
+      console.log('Comment also saved to file');
+    } catch (fileError) {
+      console.warn('Could not save to file, but Firebase create succeeded:', fileError);
+    }
+
     return newComment;
   } catch (error: any) {
     console.error('=== CREATE COMMENT ERROR ===');
@@ -321,16 +348,32 @@ export async function updateComment(id: string, comment: any) {
     console.log('=== UPDATE COMMENT CALLED ===');
     console.log('Comment ID:', id);
     console.log('Comment data:', JSON.stringify(comment, null, 2));
-    
-    const fs = await import('fs');
-    const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
-    const comments = JSON.parse(data);
-    const updatedComments = comments.map((c: any) => 
-      c.id === id ? comment : c
-    );
-    fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(updatedComments, null, 2), 'utf-8');
-    console.log('Comment updated successfully');
-    return { id, ...comment };
+
+    const cleanedComment: any = {};
+    Object.keys(comment).forEach(key => {
+      if (comment[key] !== undefined && comment[key] !== null && comment[key] !== '' && key !== 'id') {
+        cleanedComment[key] = comment[key];
+      }
+    });
+
+    const commentRef = doc(db, 'comments', id);
+    await updateDoc(commentRef, cleanedComment);
+    console.log('Comment updated in Firebase Firestore successfully');
+
+    try {
+      const fs = await import('fs');
+      const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
+      const comments = JSON.parse(data);
+      const updatedComments = comments.map((c: any) => 
+        String(c.id) === String(id) ? { ...cleanedComment, id } : c
+      );
+      fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(updatedComments, null, 2), 'utf-8');
+      console.log('Comment also updated in file');
+    } catch (fileError) {
+      console.warn('Could not update file, but Firebase update succeeded:', fileError);
+    }
+
+    return { id, ...cleanedComment };
   } catch (error: any) {
     console.error('=== UPDATE COMMENT ERROR ===');
     console.error('Error name:', error.name);
@@ -345,13 +388,26 @@ export async function deleteComment(id: string) {
   try {
     console.log('=== DELETE COMMENT CALLED ===');
     console.log('Comment ID:', id);
+
+    try {
+      const commentRef = doc(db, 'comments', id);
+      await deleteDoc(commentRef);
+      console.log('Comment deleted from Firebase Firestore successfully');
+    } catch (firestoreError: any) {
+      console.log('Firebase delete:', firestoreError.code === 'not-found' ? 'Comment not found in Firestore (ok)' : 'Failed');
+    }
     
-    const fs = await import('fs');
-    const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
-    const comments = JSON.parse(data);
-    const filteredComments = comments.filter((c: any) => c.id !== id);
-    fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(filteredComments, null, 2), 'utf-8');
-    console.log('Comment deleted successfully');
+    try {
+      const fs = await import('fs');
+      const data = fs.default.readFileSync(COMMENTS_FILE, 'utf-8');
+      const comments = JSON.parse(data);
+      const filteredComments = comments.filter((c: any) => String(c.id) !== String(id));
+      fs.default.writeFileSync(COMMENTS_FILE, JSON.stringify(filteredComments, null, 2), 'utf-8');
+      console.log('Comment removed from file storage successfully');
+    } catch (fileError) {
+      console.error('Error updating file storage:', fileError);
+    }
+    
     return { success: true };
   } catch (error: any) {
     console.error('=== DELETE COMMENT ERROR ===');
