@@ -56,7 +56,10 @@ export default function AdminDashboard() {
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('adminToken');
 
+        console.log('Checking auth, token exists:', !!token);
+
         if (!token) {
+          console.log('No token found, redirecting to admin login');
           router.push('/admin');
           return;
         }
@@ -69,11 +72,24 @@ export default function AdminDashboard() {
             },
           });
 
+          console.log('Auth response status:', response.status);
+
           if (!response.ok) {
+            const data = await response.json();
+            console.log('Auth failed:', data);
             localStorage.removeItem('adminToken');
             router.push('/admin');
+          } else {
+            const data = await response.json();
+            console.log('Auth success:', data);
+            if (!data.authenticated) {
+              console.log('Not authenticated, redirecting');
+              localStorage.removeItem('adminToken');
+              router.push('/admin');
+            }
           }
         } catch (error) {
+          console.error('Auth error:', error);
           localStorage.removeItem('adminToken');
           router.push('/admin');
         }
@@ -81,7 +97,7 @@ export default function AdminDashboard() {
     };
 
     checkAuth();
-  }, [router]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
