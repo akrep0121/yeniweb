@@ -106,12 +106,15 @@ export async function createBlog(blog: any) {
 
     const cleanedBlog: any = {};
     Object.keys(blog).forEach(key => {
-      if (blog[key] !== undefined && blog[key] !== null && blog[key] !== '' && key !== 'id' && key !== 'type') {
+      if (blog[key] !== undefined && blog[key] !== null && key !== 'id' && key !== 'type') {
         cleanedBlog[key] = blog[key];
       }
     });
 
-    if (!cleanedBlog.slug || cleanedBlog.slug === '') {
+    console.log('Initial cleaned blog data (before slug generation):', JSON.stringify(cleanedBlog, null, 2));
+    console.log('Slug in cleaned blog:', cleanedBlog.slug, 'Type:', typeof cleanedBlog.slug);
+
+    if (!cleanedBlog.slug || cleanedBlog.slug === '' || typeof cleanedBlog.slug === 'undefined') {
       if (cleanedBlog.title) {
         cleanedBlog.slug = generateSlug(cleanedBlog.title);
         console.log('Generated slug from title:', cleanedBlog.slug);
@@ -121,7 +124,7 @@ export async function createBlog(blog: any) {
       }
     }
 
-    console.log('Cleaned blog data:', JSON.stringify(cleanedBlog, null, 2));
+    console.log('Cleaned blog data (after slug generation):', JSON.stringify(cleanedBlog, null, 2));
 
     const blogsRef = collection(db, 'blogs');
     const docRef = await addDoc(blogsRef, cleanedBlog);
