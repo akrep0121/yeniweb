@@ -125,9 +125,13 @@ export default function AdminDashboard() {
         const response = await fetch('/api/blogs');
         const blogs = await response.json();
         console.log('Loaded blogs:', blogs);
-        blogs.forEach((blog: any, index: number) => {
-          console.log(`Blog ${index} - ID:`, blog.id, 'Title:', blog.title);
-        });
+        console.log('Blogs type:', typeof blogs);
+        console.log('Blogs is array:', Array.isArray(blogs));
+        if (Array.isArray(blogs)) {
+          blogs.forEach((blog: any, index: number) => {
+            console.log(`Blog ${index} - ID:`, blog.id, 'Type:', typeof blog.id, 'Title:', blog.title);
+          });
+        }
         setBlogList(blogs);
       } catch (error) {
         console.error('Failed to load blogs:', error);
@@ -155,6 +159,7 @@ export default function AdminDashboard() {
 
   const handleDelete = async (id: string, type: 'blog' | 'comment') => {
     console.log('handleDelete called with ID:', id, 'type:', type);
+    console.log('ID type:', typeof id);
 
     if (type === 'blog') {
       try {
@@ -167,7 +172,7 @@ export default function AdminDashboard() {
         console.log('Delete response data:', data);
 
         if (response.ok) {
-          setBlogList(blogList.filter((item) => item.id !== id));
+          setBlogList(blogList.filter((item) => String(item.id) !== String(id)));
           alert('Blog başarıyla silindi!');
         } else {
           alert('Silme işlemi başarısız: ' + (data.error || 'Bilinmeyen hata'));
@@ -493,17 +498,24 @@ export default function AdminDashboard() {
                           >
                             <Edit className="w-4 h-4 text-white" />
                           </button>
-                          <button
+                            <button
                             onClick={() => {
                               console.log('=== DELETE BUTTON CLICKED ===');
                               console.log('Full blog object:', JSON.stringify(blog, null, 2));
                               console.log('Blog ID (raw):', blog.id);
                               console.log('Blog ID (typeof):', typeof blog.id);
-                              console.log('Blog ID (string):', String(blog.id));
                               console.log('Blog Title:', blog.title);
-                              const blogId = blog.id ? String(blog.id) : null;
+                              
+                              let blogId = null;
+                              if (blog.id) {
+                                blogId = String(blog.id);
+                              } else if (blog.slug) {
+                                blogId = blog.slug;
+                                console.log('Using slug as ID fallback:', blogId);
+                              }
+                              
                               console.log('Final blog ID to delete:', blogId);
-                              if (blogId) {
+                              if (blogId && blogId !== 'undefined' && blogId !== '') {
                                 handleDelete(blogId, 'blog');
                               } else {
                                 alert('Blog ID bulunamadı! Sayfayı yenileyip tekrar deneyin.');

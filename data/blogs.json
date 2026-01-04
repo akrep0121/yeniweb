@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "id": "1",
     "title": "2024 Yatırım Stratejisi",
     "slug": "2024-yatirim-stratejisi",
     "excerpt": "Yeni yılda yatırım portfolyosunu nasıl optimize etmeniz gerektiğine dair detaylı analiz.",
@@ -31,7 +31,7 @@
     ]
   },
   {
-    "id": 2,
+    "id": "2",
     "title": "Teknik Analiz Temelleri",
     "slug": "teknik-analiz-temelleri",
     "excerpt": "Grafik okuma ve teknik analiz konusunda başlangıç seviyesi rehber.",
@@ -62,7 +62,7 @@
     ]
   },
   {
-    "id": 3,
+    "id": "3",
     "title": "Altın Yatırımları ve Geleceği",
     "slug": "altin-yatirimlari-gelecegi",
     "excerpt": "Geleneksel güvenli liman olarak altının 2024 beklentileri.",
@@ -92,7 +92,7 @@
     ]
   },
   {
-    "id": 4,
+    "id": "4",
     "type": "blog",
     "title": "denem",
     "slug": "",

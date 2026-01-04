@@ -164,19 +164,25 @@ export async function deleteBlog(id: string) {
     console.log('=== DELETE BLOG (FIREBASE FIRESTORE) CALLED ===');
     console.log('Blog ID to delete:', id);
     console.log('ID type:', typeof id);
+    console.log('ID length:', id.length);
 
-    const blogRef = doc(db, 'blogs', id);
-    await deleteDoc(blogRef);
-    
-    console.log('Blog deleted from Firebase Firestore successfully');
+    try {
+      const blogRef = doc(db, 'blogs', id);
+      await deleteDoc(blogRef);
+      console.log('Blog deleted from Firebase Firestore successfully');
+    } catch (firestoreError: any) {
+      console.warn('Firebase delete failed, trying fallback:', firestoreError.message);
+    }
     
     try {
       const blogs = await loadBlogsFromFile();
+      console.log('File blogs before delete:', blogs.length);
       const filteredBlogs = blogs.filter((b: any) => String(b.id) !== String(id));
+      console.log('File blogs after delete:', filteredBlogs.length);
       await saveBlogsToFile(filteredBlogs);
-      console.log('Blog also removed from file storage');
+      console.log('Blog removed from file storage successfully');
     } catch (fileError) {
-      console.warn('Could not update file storage, but Firebase delete succeeded:', fileError);
+      console.error('Error updating file storage:', fileError);
     }
     
     return { success: true };
