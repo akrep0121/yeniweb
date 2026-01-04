@@ -44,7 +44,7 @@ export default function Hero() {
     <section className="min-h-screen flex items-center justify-center pt-20 bg-gradient-to-b from-black via-gray-900 to-black">
       <div className="container mx-auto px-4 text-center">
         <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-          Merhaba, Ben <span className="text-blue-500">Soner</span>
+          Merhaba, Ben <span className="text-blue-500">Soner Yılmaz</span>
         </h1>
         <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto">
           Profesyonel Yatırımcı & Finans Uzmanı
