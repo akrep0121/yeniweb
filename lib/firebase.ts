@@ -50,6 +50,12 @@ function generateSlug(title: string): string {
   return title
     .toLowerCase()
     .trim()
+    .replace(/ç/g, 'c')
+    .replace(/ğ/g, 'g')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ş/g, 's')
+    .replace(/ü/g, 'u')
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '') + '-' + Date.now().toString().slice(-4);

@@ -37,8 +37,11 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
     const fetchBlog = async () => {
       try {
         console.log('=== FETCHING BLOG ===');
-        console.log('Slug from params:', params.slug);
+        console.log('Slug from params (raw):', params.slug);
         
+        const decodedSlug = decodeURIComponent(params.slug);
+        console.log('Slug from params (decoded):', decodedSlug);
+
         const response = await fetch('/api/blogs');
         const blogs = await response.json();
         console.log('All blogs:', blogs);
@@ -46,16 +49,22 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
         
         if (Array.isArray(blogs)) {
           blogs.forEach((b: Blog, i: number) => {
+            const blogSlug = decodeURIComponent(b.slug || '');
             console.log(`Blog ${i}:`, {
               id: b.id,
               title: b.title,
               slug: b.slug,
+              slugDecoded: blogSlug,
               slugType: typeof b.slug
             });
           });
         }
         
-        const foundBlog = blogs.find((b: Blog) => b.slug === params.slug);
+        const foundBlog = blogs.find((b: Blog) => {
+          const blogSlug = decodeURIComponent(b.slug || '');
+          return blogSlug === decodedSlug;
+        });
+        
         console.log('Found blog:', foundBlog);
         console.log('Found blog ID:', foundBlog?.id);
         console.log('Found blog title:', foundBlog?.title);
