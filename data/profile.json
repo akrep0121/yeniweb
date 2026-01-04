@@ -1,0 +1,15 @@
+{
+  "name": "Soner Yılmaz",
+  "title": "Profesyonel Yatırımcı & Finans Uzmanı",
+  "description": "10 yılı aşkın tecrübe ile finansal piyasalarda uzmanlık. Hisse senedi, kripto para ve emtia yatırımları konusunda danışmanlık ve analiz hizmetleri.",
+  "email": "soner@example.com",
+  "twitter": "soner_yilmz",
+  "location": "İstanbul, Türkiye",
+  "experience": "10+ Yıl",
+  "specialties": ["Hisse Senetleri", "Kripto Para", "Emtia", "Teknik Analiz", "Portfolyo Yönetimi"],
+  "stats": {
+    "successfulTrades": "85%",
+    "followers": "15K",
+    "consultations": "500+"
+  }
+}

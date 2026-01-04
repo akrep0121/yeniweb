@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "title": "2024 Yatırım Stratejisi",
+    "slug": "2024-yatirim-stratejisi",
+    "excerpt": "Yeni yılda yatırım portfolyosunu nasıl optimize etmeniz gerektiğine dair detaylı analiz.",
+    "content": "# 2024 Yatırım Stratejisi\n\n## Piyasa Analizi\n\n2024 yılında global piyasalarda beklenen gelişmeler...\n\n## Hisse Senedi Stratejisi\n\nTeknoloji hisseleri önceliğimiz olmaya devam edecek...\n\n## Kripto Para Yatırımları\n\nBitcoin ETF haberiyle birlikte kripto piyasalarında...",
+    "category": "Yatırım",
+    "publishedAt": "2024-01-15",
+    "author": "Soner Yılmaz",
+    "readTime": "8 dk"
+  },
+  {
+    "id": 2,
+    "title": "Teknik Analiz Temelleri",
+    "slug": "teknik-analiz-temelleri",
+    "excerpt": "Grafik okuma ve teknik analiz konusunda başlangıç seviyesi rehber.",
+    "content": "# Teknik Analiz Temelleri\n\n## Destek ve Direnç Seviyeleri\n\nGrafiklerde en önemli konseptlerden biri...\n\n## Göstergeler\n\nRSI, MACD ve hareketli ortalamaların kullanımı...",
+    "category": "Eğitim",
+    "publishedAt": "2024-01-10",
+    "author": "Soner Yılmaz",
+    "readTime": "5 dk"
+  },
+  {
+    "id": 3,
+    "title": "Altın Yatırımları ve Geleceği",
+    "slug": "altin-yatirimlari-gelecegi",
+    "excerpt": "Geleneksel güvenli liman olarak altının 2024 beklentileri.",
+    "content": "# Altın Yatırımları ve Geleceği\n\n## Neden Altın?\n\nAltın binlerce yıldır güvenli liman olarak görülmüştür...\n\n## 2024 Fiyat Tahminleri\n\nAnalistlerin beklentileri ve piyasa koşulları...",
+    "category": "Emtia",
+    "publishedAt": "2024-01-05",
+    "author": "Soner Yılmaz",
+    "readTime": "6 dk"
+  }
+]

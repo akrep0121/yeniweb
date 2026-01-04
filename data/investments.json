@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "type": "hisse",
+    "name": "Apple Inc.",
+    "symbol": "AAPL",
+    "entryPrice": 150.00,
+    "currentPrice": 185.20,
+    "quantity": 50,
+    "category": "Teknoloji"
+  },
+  {
+    "id": 2,
+    "type": "hisse",
+    "name": "Tesla Inc.",
+    "symbol": "TSLA",
+    "entryPrice": 180.00,
+    "currentPrice": 245.50,
+    "quantity": 30,
+    "category": "Teknoloji"
+  },
+  {
+    "id": 3,
+    "type": "kripto",
+    "name": "Bitcoin",
+    "symbol": "BTC",
+    "entryPrice": 35000,
+    "currentPrice": 43500,
+    "quantity": 0.5,
+    "category": "Kripto Para"
+  },
+  {
+    "id": 4,
+    "type": "kripto",
+    "name": "Ethereum",
+    "symbol": "ETH",
+    "entryPrice": 1800,
+    "currentPrice": 2250,
+    "quantity": 3.5,
+    "category": "Kripto Para"
+  },
+  {
+    "id": 5,
+    "type": "emtia",
+    "name": "Altın",
+    "symbol": "GOLD",
+    "entryPrice": 1800,
+    "currentPrice": 2050,
+    "quantity": 5,
+    "category": "Emtia"
+  },
+  {
+    "id": 6,
+    "type": "emtia",
+    "name": "Gümüş",
+    "symbol": "SILVER",
+    "entryPrice": 22,
+    "currentPrice": 24.50,
+    "quantity": 200,
+    "category": "Emtia"
+  }
+]
