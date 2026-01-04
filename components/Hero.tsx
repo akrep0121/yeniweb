@@ -13,8 +13,13 @@ export default function Hero() {
           Profesyonel Yatırımcı & Finans Uzmanı
         </p>
         <p className="text-lg text-gray-500 mb-12 max-w-3xl mx-auto">
-          Hisse senedi, kripto para ve emtia yatırımları konusunda 10 yılı aşkın tecrübemle
-          finansal piyasalarda uzmanlık sunuyorum.
+          Hisse senedi, kripto para ve emtia piyasalarıyla uzun yıllardır ilgileniyorum.
+        </p>
+        <p className="text-lg text-gray-500 mb-12 max-w-3xl mx-auto">
+          Bu platformda; kendi yatırım felsefemi, piyasalarla ilgili düşüncelerimi ve yaptığım işlemlerden edindiğim deneyimleri paylaşıyorum.
+        </p>
+        <p className="text-lg text-gray-500 mb-12 max-w-3xl mx-auto">
+          Blog yazılarım ve sosyal medya paylaşımlarım bilgilendirme amaçlıdır.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
