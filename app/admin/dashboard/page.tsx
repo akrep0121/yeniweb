@@ -440,10 +440,19 @@ export default function AdminDashboard() {
                           </button>
                           <button
                             onClick={() => {
-                              console.log('Delete button clicked for blog:', blog);
-                              console.log('Blog ID:', blog.id);
+                              console.log('=== DELETE BUTTON CLICKED ===');
+                              console.log('Full blog object:', JSON.stringify(blog, null, 2));
+                              console.log('Blog ID (raw):', blog.id);
+                              console.log('Blog ID (typeof):', typeof blog.id);
+                              console.log('Blog ID (string):', String(blog.id));
                               console.log('Blog Title:', blog.title);
-                              handleDelete(blog.id, 'blog');
+                              const blogId = blog.id ? String(blog.id) : null;
+                              console.log('Final blog ID to delete:', blogId);
+                              if (blogId) {
+                                handleDelete(blogId, 'blog');
+                              } else {
+                                alert('Blog ID bulunamadı! Sayfayı yenileyip tekrar deneyin.');
+                              }
                             }}
                             className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all"
                           >
