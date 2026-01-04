@@ -154,7 +154,7 @@ export default function AdminDashboard() {
 
     if (type === 'blog') {
       try {
-        const response = await fetch(`/api/blogs?id=${id}`, {
+        const response = await fetch(`/api/blogs?id=${encodeURIComponent(id)}`, {
           method: 'DELETE'
         });
 
