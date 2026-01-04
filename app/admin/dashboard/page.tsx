@@ -52,16 +52,39 @@ export default function AdminDashboard() {
   const [blogList, setBlogList] = useState<Blog[]>(blogs);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isLoggedIn = localStorage.getItem('adminLoggedIn');
-      if (isLoggedIn !== 'true') {
-        router.push('/admin');
+    const checkAuth = async () => {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('adminToken');
+
+        if (!token) {
+          router.push('/admin');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/auth', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            localStorage.removeItem('adminToken');
+            router.push('/admin');
+          }
+        } catch (error) {
+          localStorage.removeItem('adminToken');
+          router.push('/admin');
+        }
       }
-    }
+    };
+
+    checkAuth();
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('adminToken');
     router.push('/admin');
   };
 

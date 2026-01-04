@@ -2,20 +2,40 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Shield } from 'lucide-react';
+import { Lock, Shield, Loader2 } from 'lucide-react';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'KJSA1660') {
-      localStorage.setItem('adminLoggedIn', 'true');
-      router.push('/admin/dashboard');
-    } else {
-      setError('Hatalı şifre!');
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem('adminToken', data.token);
+        router.push('/admin/dashboard');
+      } else {
+        setError(data.error || 'Giriş başarısız!');
+      }
+    } catch (err) {
+      setError('Bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,9 +77,17 @@ export default function AdminLogin() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-all"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-8 py-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
             >
-              Giriş Yap
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Giriş yapılıyor...
+                </>
+              ) : (
+                'Giriş Yap'
+              )}
             </button>
           </form>
 

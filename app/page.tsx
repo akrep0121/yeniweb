@@ -16,8 +16,8 @@ export default function Home() {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'a') {
         event.preventDefault();
-        const isAdminLoggedIn = localStorage.getItem('adminLoggedIn');
-        if (isAdminLoggedIn === 'true') {
+        const token = localStorage.getItem('adminToken');
+        if (token) {
           router.push('/admin/dashboard');
         } else {
           router.push('/admin');
