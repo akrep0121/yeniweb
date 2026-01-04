@@ -234,22 +234,88 @@ export default function AdminDashboard() {
           body: JSON.stringify(editingItem)
         });
 
+        console.log('=== POST RESPONSE START ===');
         console.log('Response status:', response.status);
-        const data = await response.json();
-        console.log('Response data:', JSON.stringify(data, null, 2));
+        console.log('Response status text:', response.statusText);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        console.log('Response type:', response.type);
+
+        const text = await response.text();
+        console.log('=== RAW RESPONSE TEXT ===');
+        console.log(text);
+        console.log('=== RAW RESPONSE END ===');
+
+        if (!response.ok) {
+          console.error('POST request failed with status:', response.status);
+          alert('Ekleme işlemi başarısız! Status: ' + response.status);
+          return;
+        }
+
+        let data;
+        try {
+          data = JSON.parse(text);
+          console.log('=== PARSED RESPONSE DATA ===');
+          console.log('Response data parsed:', JSON.stringify(data, null, 2));
+        } catch (parseError) {
+          console.error('=== PARSE ERROR ===');
+          console.error('Failed to parse response:', parseError);
+          console.error('Raw response text:', text);
+          alert('Sunucu geçersiz yanıt döndü! Sayfayı yenileyip tekrar deneyin.');
+          return;
+        }
+
         console.log('Saved blog object:', JSON.stringify(data.blog, null, 2));
         console.log('Saved blog ID:', data.blog?.id);
+        console.log('Saved blog keys:', data.blog ? Object.keys(data.blog) : 'undefined');
 
-        if (response.ok) {
-          console.log('Adding blog to list. Current count:', blogList.length);
+        if (!data.blog || !data.blog.id) {
+          console.error('Blog ID is missing in response!');
+          alert('Blog oluşturuldu ancak ID alınamadı! Sayfayı yenileyip tekrar deneyin.');
           setBlogList([...blogList, data.blog]);
-          console.log('New blog list count:', blogList.length + 1);
           setIsEditing(false);
           setIsAddingNew(false);
           setEditingItem(null);
-        } else {
-          alert('Ekleme işlemi başarısız!');
+          return;
         }
+
+        console.log('Adding blog to list. Current count:', blogList.length);
+        const newBlogList = [...blogList, data.blog];
+        console.log('New blog list count:', newBlogList.length);
+        setBlogList(newBlogList);
+        setIsEditing(false);
+        setIsAddingNew(false);
+        setEditingItem(null);
+      } catch (error) {
+        console.error('=== SAVE ERROR ===');
+        console.error('Save blog error:', error);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        alert('Kaydetme işlemi başarısız!');
+      }
+    } else if (editingItem.type === 'blog') {
+      try {
+        const response = await fetch('/api/blogs', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editingItem)
+        });
+
+        if (response.ok) {
+          setBlogList(
+            blogList.map((item) =>
+              item.id === editingItem.id ? editingItem : item
+            )
+          );
+          setIsEditing(false);
+          setIsAddingNew(false);
+          setEditingItem(null);
+        }
+      } catch (error) {
+        console.error('Save blog error:', error);
+        alert('Kaydetme işlemi başarısız!');
+      }
+    }
       } catch (error) {
         console.error('Save blog error:', error);
         alert('Kaydetme işlemi başarısız!');
