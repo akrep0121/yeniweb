@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getBlogs, syncToKV } from '@/lib/kv';
 
 const BLOGS_FILE = path.join(process.cwd(), 'data', 'blogs.json');
 
 export async function GET(request: NextRequest) {
   try {
-    if (!fs.existsSync(BLOGS_FILE)) {
-      return NextResponse.json([]);
-    }
-
-    const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
-    return NextResponse.json(blogsData);
-  } catch (error) {
+    const blogs = await getBlogs();
+    return NextResponse.json(blogs);
+  } catch (error: any) {
     console.error('Blogs GET error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -23,25 +20,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('POST blogs request');
     const newBlog = await request.json();
-    console.log('New blog:', newBlog);
 
-    if (!fs.existsSync(BLOGS_FILE)) {
-      console.log('Creating new blogs file');
-      const initialData = [newBlog];
-      fs.writeFileSync(BLOGS_FILE, JSON.stringify(initialData, null, 2));
-      return NextResponse.json({ success: true, blog: newBlog });
-    }
+    const blogs = await getBlogs();
+    const updatedBlogs = [...blogs, newBlog];
 
-    const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
-    const updatedBlogs = [...blogsData, newBlog];
-    console.log('Updated blogs count:', updatedBlogs.length);
-
-    fs.writeFileSync(BLOGS_FILE, JSON.stringify(updatedBlogs, null, 2));
+    await syncToKV(updatedBlogs);
 
     return NextResponse.json({ success: true, blog: newBlog });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Blogs POST error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -52,20 +39,10 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    console.log('PUT blogs request');
     const updatedBlog = await request.json();
-    console.log('Updated blog:', updatedBlog);
 
-    if (!fs.existsSync(BLOGS_FILE)) {
-      return NextResponse.json(
-        { error: 'Blogs file not found' },
-        { status: 404 }
-      );
-    }
-
-    const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
-    const index = blogsData.findIndex((blog: any) => blog.id === updatedBlog.id);
-    console.log('Blog index:', index);
+    const blogs = await getBlogs();
+    const index = blogs.findIndex((blog: any) => blog.id === updatedBlog.id);
 
     if (index === -1) {
       return NextResponse.json(
@@ -74,12 +51,12 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    blogsData[index] = updatedBlog;
-    fs.writeFileSync(BLOGS_FILE, JSON.stringify(blogsData, null, 2));
-    console.log('Blogs saved successfully');
+    blogs[index] = updatedBlog;
+
+    await syncToKV(blogs);
 
     return NextResponse.json({ success: true, blog: updatedBlog });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Blogs PUT error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -90,36 +67,26 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(request.nextUrl);
     const id = searchParams.get('id');
 
     console.log('DELETE request - ID:', id);
 
     if (!id) {
-      console.log('DELETE error: No ID provided');
       return NextResponse.json(
         { error: 'Blog ID is required' },
         { status: 400 }
       );
     }
 
-    if (!fs.existsSync(BLOGS_FILE)) {
-      return NextResponse.json(
-        { error: 'Blogs file not found' },
-        { status: 404 }
-      );
-    }
-
-    const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
-    console.log('Current blogs count:', blogsData.length);
-
-    const filteredBlogs = blogsData.filter((blog: any) => String(blog.id) !== id);
+    const blogs = await getBlogs();
+    const filteredBlogs = blogs.filter((blog: any) => String(blog.id) !== id);
     console.log('After delete blogs count:', filteredBlogs.length);
 
-    fs.writeFileSync(BLOGS_FILE, JSON.stringify(filteredBlogs, null, 2));
+    await syncToKV(filteredBlogs);
 
     return NextResponse.json({ success: true, message: 'Blog deleted successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Blogs DELETE error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
