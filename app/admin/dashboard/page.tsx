@@ -630,6 +630,26 @@ export default function AdminDashboard() {
               {Object.keys(editingItem).map((key) => {
                 if (key === 'type' || key === 'id') return null;
 
+                if (key === 'slug') {
+                  return (
+                    <div key={key}>
+                      <label className="block text-gray-400 mb-2 capitalize">URL Slug (otomatik oluşturulabilir)</label>
+                      <input
+                        type="text"
+                        value={editingItem[key]}
+                        onChange={(e) =>
+                          setEditingItem({
+                            ...editingItem,
+                            [key]: e.target.value
+                          })
+                        }
+                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
+                        placeholder="blog-yazisi-slug"
+                      />
+                    </div>
+                  );
+                }
+
                 if (key === 'tags' && Array.isArray(editingItem[key])) {
                   return (
                     <div key={key}>
