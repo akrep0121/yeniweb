@@ -28,20 +28,20 @@ export default function BlogPage() {
   }, [blogs]);
 
   const filteredBlogs = useMemo(() => {
-    let filtered = blogs;
+    let filtered = blogs as any[];
 
     if (activeTag) {
-      filtered = filtered.filter(blog =>
+      filtered = filtered.filter((blog: any) =>
         blog.tags && blog.tags.includes(activeTag)
       );
     }
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(blog =>
+      filtered = filtered.filter((blog: any) =>
         blog.title.toLowerCase().includes(query) ||
         blog.excerpt.toLowerCase().includes(query) ||
-        (blog.tags && blog.tags.some(tag => tag.toLowerCase().includes(query)))
+        (blog.tags && blog.tags.some((tag: string) => tag.toLowerCase().includes(query)))
       );
     }
 

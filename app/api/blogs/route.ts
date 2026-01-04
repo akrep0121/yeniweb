@@ -23,9 +23,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('POST blogs request');
     const newBlog = await request.json();
+    console.log('New blog:', newBlog);
 
     if (!fs.existsSync(BLOGS_FILE)) {
+      console.log('Creating new blogs file');
       const initialData = [newBlog];
       fs.writeFileSync(BLOGS_FILE, JSON.stringify(initialData, null, 2));
       return NextResponse.json({ success: true, blog: newBlog });
@@ -33,6 +36,8 @@ export async function POST(request: NextRequest) {
 
     const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
     const updatedBlogs = [...blogsData, newBlog];
+    console.log('Updated blogs count:', updatedBlogs.length);
+
     fs.writeFileSync(BLOGS_FILE, JSON.stringify(updatedBlogs, null, 2));
 
     return NextResponse.json({ success: true, blog: newBlog });
@@ -47,7 +52,9 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log('PUT blogs request');
     const updatedBlog = await request.json();
+    console.log('Updated blog:', updatedBlog);
 
     if (!fs.existsSync(BLOGS_FILE)) {
       return NextResponse.json(
@@ -58,6 +65,7 @@ export async function PUT(request: NextRequest) {
 
     const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
     const index = blogsData.findIndex((blog: any) => blog.id === updatedBlog.id);
+    console.log('Blog index:', index);
 
     if (index === -1) {
       return NextResponse.json(
@@ -68,6 +76,7 @@ export async function PUT(request: NextRequest) {
 
     blogsData[index] = updatedBlog;
     fs.writeFileSync(BLOGS_FILE, JSON.stringify(blogsData, null, 2));
+    console.log('Blogs saved successfully');
 
     return NextResponse.json({ success: true, blog: updatedBlog });
   } catch (error) {
@@ -81,10 +90,13 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(request.nextUrl);
     const id = searchParams.get('id');
 
+    console.log('DELETE request - ID:', id);
+
     if (!id) {
+      console.log('DELETE error: No ID provided');
       return NextResponse.json(
         { error: 'Blog ID is required' },
         { status: 400 }
@@ -99,7 +111,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     const blogsData = JSON.parse(fs.readFileSync(BLOGS_FILE, 'utf-8'));
+    console.log('Current blogs count:', blogsData.length);
+
     const filteredBlogs = blogsData.filter((blog: any) => blog.id !== parseInt(id));
+    console.log('After delete blogs count:', filteredBlogs.length);
 
     fs.writeFileSync(BLOGS_FILE, JSON.stringify(filteredBlogs, null, 2));
 
