@@ -52,7 +52,7 @@ export default function Hero() {
         {paragraphs.map((_, index) => (
           <p 
             key={index} 
-            className={`text-lg text-gray-500 mb-12 max-w-3xl mx-auto min-h-[4.5rem] ${
+            className={`text-lg text-gray-500 mb-6 max-w-3xl mx-auto min-h-[4.5rem] ${
               index <= currentParagraph ? 'opacity-100' : 'opacity-0'
             }`}
           >
