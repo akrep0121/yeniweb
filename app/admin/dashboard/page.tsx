@@ -269,19 +269,24 @@ export default function AdminDashboard() {
         console.log('Saved blog keys:', data.blog ? Object.keys(data.blog) : 'undefined');
 
         if (!data.blog || !data.blog.id) {
-          console.error('Blog ID is missing in response!');
-          alert('Blog oluşturuldu ancak ID alınamadı! Sayfayı yenileyip tekrar deneyin.');
-          setBlogList([...blogList, data.blog]);
+          console.error('!!! CRITICAL: Blog ID is missing in response!');
+          console.error('Response blog:', JSON.stringify(data.blog, null, 2));
+          const newBlog = { ...editingItem, id: data.blog.id || Date.now().toString() };
+          console.log('!!! Creating new blog object with manual ID:', newBlog.id);
+          setBlogList([...blogList, newBlog]);
+          console.log('New blog list count:', blogList.length + 1);
           setIsEditing(false);
           setIsAddingNew(false);
           setEditingItem(null);
           return;
         }
 
-        console.log('Adding blog to list. Current count:', blogList.length);
+        console.log('Adding blog to list with Firebase ID:', data.blog.id);
         const newBlogList = [...blogList, data.blog];
         console.log('New blog list count:', newBlogList.length);
+        console.log('New blog list:', newBlogList);
         setBlogList(newBlogList);
+        console.log('=== BLOG LIST UPDATED ===');
         setIsEditing(false);
         setIsAddingNew(false);
         setEditingItem(null);
@@ -291,6 +296,7 @@ export default function AdminDashboard() {
         console.error('Error name:', error.name);
         console.error('Error message:', error.message);
         console.error('Error stack:', error.stack);
+        console.error('Full error:', error);
         alert('Kaydetme işlemi başarısız!');
       }
     } else if (editingItem.type === 'blog') {
@@ -310,35 +316,6 @@ export default function AdminDashboard() {
           setIsEditing(false);
           setIsAddingNew(false);
           setEditingItem(null);
-        }
-      } catch (error) {
-        console.error('Save blog error:', error);
-        alert('Kaydetme işlemi başarısız!');
-      }
-    }
-      } catch (error) {
-        console.error('Save blog error:', error);
-        alert('Kaydetme işlemi başarısız!');
-      }
-    } else if (editingItem.type === 'blog') {
-      try {
-        const response = await fetch('/api/blogs', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editingItem)
-        });
-
-        if (response.ok) {
-          setBlogList(
-            blogList.map((item) =>
-              item.id === editingItem.id ? editingItem : item
-            )
-          );
-          setIsEditing(false);
-          setIsAddingNew(false);
-          setEditingItem(null);
-        } else {
-          alert('Güncelleme işlemi başarısız!');
         }
       } catch (error) {
         console.error('Save blog error:', error);
