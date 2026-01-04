@@ -47,7 +47,7 @@ export default function Hero() {
           Merhaba, Ben <span className="text-blue-500">Soner Yılmaz</span>
         </h1>
         <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto">
-          Profesyonel Yatırımcı & Finans Uzmanı
+          Bireysel Yatırımcı & Piyasa Gözlemcisi
         </p>
         {paragraphs.map((_, index) => (
           <p 
