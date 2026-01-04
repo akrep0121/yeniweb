@@ -161,17 +161,21 @@ export async function updateBlog(id: string, blog: any) {
 
 export async function deleteBlog(id: string) {
   try {
-    console.log('=== DELETE BLOG (FIREBASE FIRESTORE) CALLED ===');
+    console.log('=== DELETE BLOG (FIREBASE + FILE) CALLED ===');
     console.log('Blog ID to delete:', id);
     console.log('ID type:', typeof id);
     console.log('ID length:', id.length);
 
+    let deletedFromFirestore = false;
+    let deletedFromFile = false;
+
     try {
       const blogRef = doc(db, 'blogs', id);
       await deleteDoc(blogRef);
+      deletedFromFirestore = true;
       console.log('Blog deleted from Firebase Firestore successfully');
     } catch (firestoreError: any) {
-      console.warn('Firebase delete failed, trying fallback:', firestoreError.message);
+      console.log('Firebase delete:', firestoreError.code === 'not-found' ? 'Blog not found in Firestore (ok)' : 'Failed');
     }
     
     try {
@@ -180,16 +184,20 @@ export async function deleteBlog(id: string) {
       const filteredBlogs = blogs.filter((b: any) => String(b.id) !== String(id));
       console.log('File blogs after delete:', filteredBlogs.length);
       await saveBlogsToFile(filteredBlogs);
+      deletedFromFile = true;
       console.log('Blog removed from file storage successfully');
     } catch (fileError) {
       console.error('Error updating file storage:', fileError);
     }
     
-    return { success: true };
+    if (!deletedFromFirestore && !deletedFromFile) {
+      throw new Error('Blog could not be deleted from either Firestore or file storage');
+    }
+    
+    console.log('Delete completed. Firestore:', deletedFromFirestore, 'File:', deletedFromFile);
+    return { success: true, deletedFromFirestore, deletedFromFile };
   } catch (error: any) {
-    console.error('deleteBlog error (FIREBASE FIRESTORE):', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
+    console.error('deleteBlog error:', error);
     throw error;
   }
 }
