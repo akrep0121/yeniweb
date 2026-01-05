@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import AnalyticsChart from '@/components/AnalyticsChart';
+import MarkdownEditor from '@/components/MarkdownEditor';
 import {
   LayoutDashboard,
   FileText,
@@ -892,13 +893,11 @@ export default function AdminDashboard() {
                 if (key === 'content') {
                   return (
                     <div key={key}>
-                      <label className="block text-gray-400 mb-2 capitalize">İçerik</label>
-                      <textarea
+                      <label className="block text-gray-400 mb-2">İçerik (Markdown formatında)</label>
+                      <MarkdownEditor
                         value={editingItem[key]}
-                        onChange={(e) => setEditingItem({ ...editingItem, [key]: e.target.value })}
-                        rows={8}
+                        onChange={(val) => setEditingItem({ ...editingItem, [key]: val })}
                         placeholder="Markdown formatında içerik girin..."
-                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none resize-none"
                       />
                     </div>
                   );

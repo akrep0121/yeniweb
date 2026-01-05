@@ -52,12 +52,19 @@ export default function Home() {
       try {
         const response = await fetch('/api/blogs');
         const data = await response.json();
-        setBlogs(data);
+        
+        const sortedBlogs = data.sort((a: Blog, b: Blog) => {
+          const dateA = new Date(a.publishedAt);
+          const dateB = new Date(b.publishedAt);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        setBlogs(sortedBlogs);
       } catch (error) {
         console.error('Error fetching blogs:', error);
       }
     };
-
+ 
     fetchBlogs();
   }, []);
 
