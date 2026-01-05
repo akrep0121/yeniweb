@@ -9,6 +9,7 @@ import CommentForm from '@/components/CommentForm';
 import SocialShare from '@/components/SocialShare';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Calendar, Eye } from 'lucide-react';
+import { marked } from 'marked';
 
 interface Blog {
   id: string;
@@ -198,7 +199,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
 
           <div className="prose prose-invert prose-lg max-w-none">
             <div className="bg-gray-900 rounded-xl p-8 border border-gray-800">
-              <div dangerouslySetInnerHTML={{ __html: blog.content.replace(/\n/g, '<br />') }} />
+              <div dangerouslySetInnerHTML={{ __html: marked(blog.content || '') }} />
             </div>
           </div>
         </div>
