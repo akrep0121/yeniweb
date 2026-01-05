@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Github, Twitter } from 'lucide-react';
+import { ArrowRight, Twitter } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const paragraphs = [
@@ -77,25 +77,17 @@ export default function Hero() {
           </a>
         </div>
 
-        <div className="flex justify-center gap-6 mt-12">
-          <a
-            href="https://twitter.com/soner_yilmz"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-blue-500 transition-colors"
-          >
-            <Twitter className="w-6 h-6" />
-          </a>
-          <a
-            href="https://github.com/akrep0121"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-blue-500 transition-colors"
-          >
-            <Github className="w-6 h-6" />
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
+         <div className="flex justify-center gap-6 mt-12">
+           <a
+             href="https://twitter.com/soner_yilmz"
+             target="_blank"
+             rel="noopener noreferrer"
+             className="text-gray-400 hover:text-blue-500 transition-colors"
+           >
+             <Twitter className="w-6 h-6" />
+           </a>
+         </div>
+       </div>
+     </section>
+   );
+ }
