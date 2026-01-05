@@ -61,13 +61,19 @@ export default function BlogPage() {
 
   const filteredBlogs = useMemo(() => {
     let filtered = blogs as any[];
-
+    
+    filtered = filtered.sort((a: Blog, b: Blog) => {
+      const dateA = new Date(a.publishedAt);
+      const dateB = new Date(b.publishedAt);
+      return dateB.getTime() - dateA.getTime();
+    });
+    
     if (activeTag) {
       filtered = filtered.filter((blog: any) =>
         blog.tags && blog.tags.includes(activeTag)
       );
     }
-
+    
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((blog: any) =>
@@ -76,7 +82,7 @@ export default function BlogPage() {
         (blog.tags && blog.tags.some((tag: string) => tag.toLowerCase().includes(query)))
       );
     }
-
+    
     return filtered;
   }, [blogs, searchQuery, activeTag]);
 
