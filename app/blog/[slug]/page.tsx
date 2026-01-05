@@ -4,10 +4,12 @@ import Footer from '@/components/Footer';
 import Tags from '@/components/Tags';
 import Comments from '@/components/Comments';
 import BlogPostClient from '@/components/BlogPostClient';
+import RelatedPosts from '@/components/RelatedPosts';
+import KeywordLink from '@/components/KeywordLink';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { marked } from 'marked';
-import { getBlogBySlug, getComments } from '@/lib/firebase';
+import { getBlogBySlug, getComments, getBlogs } from '@/lib/firebase';
 import type { Metadata } from 'next';
 
 interface Blog {
@@ -77,14 +79,51 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function BlogPost({ params }: PageProps) {
   const blog = await getBlogData(params.slug);
   const comments = await getComments();
+  const allBlogs = await getBlogs();
 
   if (!blog) {
     notFound();
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: blog.title,
+    description: blog.excerpt || blog.content?.substring(0, 160),
+    image: blog.coverImage,
+    author: {
+      '@type': 'Person',
+      name: blog.author,
+      url: 'https://yeniweb.vercel.app'
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Soner Yılmaz',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://yeniweb.vercel.app/logo.png'
+      }
+    },
+    datePublished: blog.publishedAt,
+    dateModified: blog.publishedAt,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://yeniweb.vercel.app/blog/${blog.slug}`
+    },
+    keywords: blog.metaKeywords?.join(', ') || blog.tags?.join(', ') || '',
+    articleSection: blog.category
+  };
+
+  const contentHtml = marked.parse(blog.content || '') as string;
+
   return (
-    <div className="min-h-screen">
-      <Header />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="min-h-screen">
+        <Header />
 
       <article className="pt-24 pb-20 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -139,7 +178,11 @@ export default async function BlogPost({ params }: PageProps) {
 
           <div className="prose prose-invert prose-lg max-w-none">
             <div className="bg-gray-900 rounded-xl p-8 border border-gray-800">
-              <div dangerouslySetInnerHTML={{ __html: marked(blog.content || '') }} />
+              <KeywordLink
+                content={blog.content || ''}
+                currentSlug={blog.slug}
+                allBlogs={allBlogs}
+              />
             </div>
           </div>
         </div>
@@ -147,7 +190,8 @@ export default async function BlogPost({ params }: PageProps) {
 
       <section className="py-12 bg-gradient-to-b from-gray-900 to-black">
         <div className="container mx-auto px-4 max-w-4xl">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <RelatedPosts currentBlog={blog} allBlogs={allBlogs} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             <div className="lg:col-span-2">
               <Comments blogId={blog.slug} comments={comments} />
               <div className="mt-8">
@@ -160,5 +204,6 @@ export default async function BlogPost({ params }: PageProps) {
 
       <Footer />
     </div>
+    </>
   );
 }
