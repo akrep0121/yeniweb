@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Bold, Italic, Code, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 import { marked } from 'marked';
 
@@ -11,21 +11,30 @@ interface MarkdownEditorProps {
 }
 
 export default function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorProps) {
+  const [localValue, setLocalValue] = useState(value);
   const [isPreview, setIsPreview] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
 
   const insertMarkdown = (prefix: string, suffix: string = '') => {
-    const textarea = document.getElementById('markdown-textarea') as HTMLTextAreaElement;
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selectedText = value.substring(start, end);
+    const selectedText = localValue.substring(start, end);
     
-    const newText = value.substring(0, start) + prefix + selectedText + suffix + value.substring(end);
-    onChange(newText);
+    const newValue = localValue.substring(0, start) + prefix + selectedText + suffix + localValue.substring(end);
+    setLocalValue(newValue);
+    onChange(newValue);
     
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       textarea.focus();
       textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
-    }, 0);
+    });
   };
 
   return (
@@ -93,9 +102,13 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
 
       {!isPreview ? (
         <textarea
+          ref={textareaRef}
           id="markdown-textarea"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={localValue}
+          onChange={(e) => {
+            setLocalValue(e.target.value);
+            onChange(e.target.value);
+          }}
           placeholder={placeholder}
           rows={12}
           className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all resize-none font-mono"
@@ -103,7 +116,7 @@ export default function MarkdownEditor({ value, onChange, placeholder }: Markdow
       ) : (
         <div
           className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 min-h-[300px] prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: marked(value) }}
+          dangerouslySetInnerHTML={{ __html: marked(localValue) }}
         />
       )}
     </div>
