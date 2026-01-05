@@ -1,15 +1,14 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { notFound } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Tags from '@/components/Tags';
 import Comments from '@/components/Comments';
-import CommentForm from '@/components/CommentForm';
-import SocialShare from '@/components/SocialShare';
+import BlogPostClient from '@/components/BlogPostClient';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Calendar, Eye } from 'lucide-react';
+import { ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { marked } from 'marked';
+import { getBlogBySlug, getComments } from '@/lib/firebase';
+import type { Metadata } from 'next';
 
 interface Blog {
   id: string;
@@ -29,113 +28,58 @@ interface Blog {
   metaKeywords?: string[];
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
-  const [blog, setBlog] = useState<Blog | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [commentList, setCommentList] = useState<any[]>([]);
-  const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
-
-  useEffect(() => {
-    const fetchBlog = async () => {
-      try {
-        setIsLoading(true);
-        console.log('=== FETCHING BLOG ===');
-        console.log('Slug from params (raw):', params.slug);
-        
-        const decodedSlug = decodeURIComponent(params.slug);
-        console.log('Slug from params (decoded):', decodedSlug);
-
-        const response = await fetch('/api/blogs');
-        const blogs = await response.json();
-        console.log('All blogs:', blogs);
-        console.log('Blogs length:', Array.isArray(blogs) ? blogs.length : 'not array');
-        
-        if (Array.isArray(blogs)) {
-          blogs.forEach((b: Blog, i: number) => {
-            const blogSlug = decodeURIComponent(b.slug || '');
-            console.log(`Blog ${i}:`, {
-              id: b.id,
-              title: b.title,
-              slug: b.slug,
-              slugDecoded: blogSlug,
-              slugType: typeof b.slug
-            });
-          });
-        }
-        
-        const foundBlog = blogs.find((b: Blog) => {
-          const blogSlug = decodeURIComponent(b.slug || '');
-          return blogSlug === decodedSlug;
-        });
-        
-        console.log('Found blog:', foundBlog);
-        console.log('Found blog ID:', foundBlog?.id);
-        console.log('Found blog title:', foundBlog?.title);
-        
-        setBlog(foundBlog || null);
-        setIsLoading(false);
-
-        if (foundBlog) {
-          fetch(`/api/stats?slug=${foundBlog.slug}&action=view`);
-        }
-      } catch (error) {
-        console.error('Error fetching blog:', error);
-        setIsLoading(false);
-      }
-    };
-
-    const fetchComments = async () => {
-      try {
-        const response = await fetch('/api/comments');
-        const comments = await response.json();
-        setCommentList(comments);
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    };
-
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/stats');
-        const data = await response.json();
-        setStats(data);
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      }
-    };
-
-    fetchBlog();
-    fetchComments();
-    fetchStats();
-  }, [params.slug]);
-
-  const handleCommentSubmit = (newComment: any) => {
-    const comment = {
-      ...newComment,
-      id: Date.now().toString(),
-      approved: false,
-      createdAt: new Date().toISOString()
-    };
-
-    const updatedComments = [...commentList, comment];
-    setCommentList(updatedComments);
-    localStorage.setItem('comments', JSON.stringify(updatedComments));
+interface PageProps {
+  params: {
+    slug: string;
   };
+}
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white">Yükleniyor...</div>
-      </div>
-    );
-  }
+async function getBlogData(slug: string) {
+  const decodedSlug = decodeURIComponent(slug);
+  const blog = await getBlogBySlug(decodedSlug);
+  return blog;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const blog = await getBlogData(params.slug);
 
   if (!blog) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white">Blog yazısı bulunamadı</div>
-      </div>
-    );
+    return {
+      title: 'Blog Yazısı Bulunamadı',
+      description: 'Blog yazısı bulunamadı',
+    };
+  }
+
+  const title = blog.metaTitle || `${blog.title} | Soner Yılmaz`;
+  const description = blog.metaDescription || blog.excerpt || `${blog.title} - Yatırım, finans ve piyasa analizi üzerine yazı`;
+
+  return {
+    title: title,
+    description: description,
+    keywords: blog.metaKeywords?.join(', '),
+    openGraph: {
+      title: title,
+      description: description,
+      type: 'article',
+      publishedTime: blog.publishedAt,
+      authors: [blog.author],
+      images: blog.coverImage ? [blog.coverImage] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: title,
+      description: description,
+      images: blog.coverImage ? [blog.coverImage] : [],
+    },
+  };
+}
+
+export default async function BlogPost({ params }: PageProps) {
+  const blog = await getBlogData(params.slug);
+  const comments = await getComments();
+
+  if (!blog) {
+    notFound();
   }
 
   return (
@@ -180,10 +124,6 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
               <span>{blog.readTime}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              <span>{stats.blogViews[blog.slug] || 0} görüntülenme</span>
-            </div>
-            <div className="flex items-center gap-2">
               <span className="font-semibold">{blog.author}</span>
             </div>
           </div>
@@ -209,18 +149,9 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <Comments blogId={blog.slug} comments={commentList} />
+              <Comments blogId={blog.slug} comments={comments} />
               <div className="mt-8">
-                <CommentForm blogId={blog.slug} onCommentSubmit={handleCommentSubmit} />
-              </div>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-6">
-                <SocialShare
-                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}/blog/${blog.slug}`}
-                  title={blog.title}
-                />
+                <BlogPostClient blogSlug={blog.slug} blogTitle={blog.title} />
               </div>
             </div>
           </div>
