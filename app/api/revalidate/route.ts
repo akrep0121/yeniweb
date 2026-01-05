@@ -13,11 +13,14 @@ export async function POST() {
       success: true, 
       message: 'Sitemap güncellendi' 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Revalidate error:', error);
+    console.error('Error message:', error?.message);
+    console.error('Error stack:', error?.stack);
     return NextResponse.json(
-      { error: 'Revalidation failed' },
+      { error: 'Revalidation failed', details: error?.message || 'Unknown error' },
       { status: 500 }
     );
   }
 }
+
