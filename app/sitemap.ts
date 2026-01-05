@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
 import { getBlogs } from '@/lib/firebase';
 
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogs = await getBlogs();
 
@@ -13,20 +15,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     {
-      url: 'https://soneryilmaz.vercel.app',
+      url: 'https://sonerylmaz.vercel.app',
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1,
     },
     {
-      url: 'https://soneryilmaz.vercel.app/blog',
+      url: 'https://sonerylmaz.vercel.app/blog',
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.9,
     },
     ...blogUrls,
     {
-      url: 'https://soneryilmaz.vercel.app/#iletisim',
+      url: 'https://sonerylmaz.vercel.app/#iletisim',
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,

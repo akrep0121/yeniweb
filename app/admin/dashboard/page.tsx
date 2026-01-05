@@ -460,13 +460,36 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all"
-            >
-              <LogOut className="w-4 h-4" />
-              Çıkış Yap
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/revalidate', {
+                      method: 'POST'
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                      alert('Sitemap güncellendi!');
+                    } else {
+                      alert('Sitemap güncellenemedi!');
+                    }
+                  } catch (error) {
+                    console.error('Revalidate error:', error);
+                    alert('Bir hata oluştu!');
+                  }
+                }}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all"
+              >
+                🔄 Sitemap Güncelle
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all"
+              >
+                <LogOut className="w-4 h-4" />
+                Çıkış Yap
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
