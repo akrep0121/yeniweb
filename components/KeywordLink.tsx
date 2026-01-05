@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { marked } from 'marked';
+import parse from 'html-react-parser';
 
 interface KeywordLinkProps {
   content: string;
@@ -13,46 +14,41 @@ interface KeywordLinkProps {
   }>;
 }
 
-export default function KeywordLink({ content, currentSlug, allBlogs }: KeywordLinkProps) {
-  const getKeywordLinks = () => {
-    const keywords: { [key: string]: string } = {};
+function getKeywordLinks(currentSlug: string, allBlogs: KeywordLinkProps['allBlogs']) {
+  const keywords: { [key: string]: string } = {};
 
-    allBlogs.forEach(blog => {
-      if (blog.slug === currentSlug) return;
+  allBlogs.forEach(blog => {
+    if (blog.slug === currentSlug) return;
 
-      const titleWords = blog.title
-        .toLowerCase()
-        .replace(/[^\w\sçğıöşü]/gi, '')
-        .split(' ')
-        .filter(word => word.length > 3);
+    const titleWords = blog.title
+      .toLowerCase()
+      .replace(/[^\w\sçğıöşü]/gi, '')
+      .split(' ')
+      .filter(word => word.length > 4);
 
-      titleWords.forEach(word => {
-        if (!keywords[word]) {
-          keywords[word] = blog.slug;
-        }
-      });
-
-      if (blog.tags) {
-        blog.tags.forEach(tag => {
-          if (!keywords[tag]) {
-            keywords[tag] = blog.slug;
-          }
-        });
+    titleWords.forEach(word => {
+      if (!keywords[word]) {
+        keywords[word] = blog.slug;
       }
     });
 
-    return keywords;
-  };
+    if (blog.tags) {
+      blog.tags.forEach(tag => {
+        if (!keywords[tag] && tag.length > 3) {
+          keywords[tag] = blog.slug;
+        }
+      });
+    }
+  });
 
-  const keywordLinks = getKeywordLinks();
-  const linkKeywords = Object.keys(keywordLinks);
+  return keywords;
+}
 
-  if (linkKeywords.length === 0) {
-    const html = marked.parse(content) as string;
-    return <div dangerouslySetInnerHTML={{ __html: html }} />;
-  }
+function replaceWithLinks(html: string, keywordLinks: { [key: string]: string }, currentSlug: string) {
+  const keywords = Object.keys(keywordLinks);
+  if (keywords.length === 0) return html;
 
-  const escapedKeywords = linkKeywords.map(keyword =>
+  const escapedKeywords = keywords.map(keyword =>
     keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   );
 
@@ -61,29 +57,28 @@ export default function KeywordLink({ content, currentSlug, allBlogs }: KeywordL
     'gi'
   );
 
-  const parts = content.split(regex);
+  return html.replace(regex, (match, word) => {
+    const lowerWord = word.toLowerCase().replace(/[^\w\sçğıöşü]/gi, '');
+    const linkedSlug = keywordLinks[lowerWord];
 
-  return (
-    <div>
-      {parts.map((part, index) => {
-        const lowerPart = part.toLowerCase().replace(/[^\w\sçğıöşü]/gi, '');
-        const linkedSlug = keywordLinks[lowerPart];
+    if (linkedSlug) {
+      return `<a href="/blog/${linkedSlug}" class="text-blue-400 hover:text-blue-300 underline font-medium">${word}</a>`;
+    }
 
-        if (linkedSlug && index % 2 === 1) {
-          const html = marked.parse(part) as string;
-          return (
-            <Link
-              key={index}
-              href={`/blog/${linkedSlug}`}
-              className="text-blue-400 hover:text-blue-300 underline font-medium"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-          );
-        }
+    return word;
+  });
+}
 
-        const html = marked.parse(part) as string;
-        return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
-      })}
-    </div>
-  );
+export default function KeywordLink({ content, currentSlug, allBlogs }: KeywordLinkProps) {
+  const keywordLinks = getKeywordLinks(currentSlug, allBlogs);
+
+  if (Object.keys(keywordLinks).length === 0) {
+    const html = marked.parse(content) as string;
+    return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  }
+
+  const html = marked.parse(content) as string;
+  const linkedHtml = replaceWithLinks(html, keywordLinks, currentSlug);
+
+  return <div>{parse(linkedHtml)}</div>;
 }
