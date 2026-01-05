@@ -58,16 +58,20 @@ interface Message {
   read: boolean;
 }
 
-export default function AdminDashboard() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'overview' | 'blogs' | 'comments' | 'messages'>('overview');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
-  const [isAddingNew, setIsAddingNew] = useState(false);
-  const [blogList, setBlogList] = useState<Blog[]>([]);
-  const [commentList, setCommentList] = useState<Comment[]>([]);
-  const [messageList, setMessageList] = useState<Message[]>([]);
-  const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
+ export default function AdminDashboard() {
+   const router = useRouter();
+   const [activeTab, setActiveTab] = useState<'overview' | 'blogs' | 'comments' | 'messages'>('overview');
+   const [isEditing, setIsEditing] = useState(false);
+   const [editingItem, setEditingItem] = useState<any>(null);
+   const [isAddingNew, setIsAddingNew] = useState(false);
+   const [blogList, setBlogList] = useState<Blog[]>([]);
+   const [commentList, setCommentList] = useState<Comment[]>([]);
+   const [messageList, setMessageList] = useState<Message[]>([]);
+   const [stats, setStats] = useState({ totalViews: 0, blogViews: {} as Record<string, number> });
+   
+   const [tagsInput, setTagsInput] = useState('');
+   const [metaKeywordsInput, setMetaKeywordsInput] = useState('');
+   const [imagesInput, setImagesInput] = useState('');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -213,6 +217,12 @@ export default function AdminDashboard() {
     setIsEditing(true);
     setIsAddingNew(false);
     setEditingItem({ ...item, type });
+    
+    if (type === 'blog') {
+      setTagsInput(item.tags ? item.tags.join(', ') : '');
+      setMetaKeywordsInput(item.metaKeywords ? item.metaKeywords.join(', ') : '');
+      setImagesInput(item.images ? item.images.join(', ') : '');
+    }
   };
 
   const handleApproveComment = async (commentId: string) => {
@@ -428,6 +438,9 @@ export default function AdminDashboard() {
     setIsEditing(false);
     setIsAddingNew(false);
     setEditingItem(null);
+    setTagsInput('');
+    setMetaKeywordsInput('');
+    setImagesInput('');
   };
 
   const popularBlogs = Object.entries(stats.blogViews || {})
@@ -847,71 +860,125 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {Object.keys(editingItem).map((key) => {
-                if (key === 'type' || key === 'id' || key === 'slug') return null;
-
-                if (key === 'tags' && Array.isArray(editingItem[key])) {
+               {Object.keys(editingItem).map((key) => {
+                if (key === 'type' || key === 'id' || key === 'slug') return null; 
+                
+                if (key === 'tags') {
                   return (
                     <div key={key}>
-                      <label className="block text-gray-400 mb-2 capitalize">Etiketler (virgülle ayırın)</label>
+                      <label className="block text-gray-400 mb-2 capitalize">
+                        Etiketler (virgülle ayırın) - {editingItem[key]?.length || 0} etiket
+                      </label>
                       <input
                         type="text"
-                        value={editingItem[key].join(', ')}
+                        value={tagsInput}
                         onChange={(e) => {
-                          const tags = e.target.value.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                          console.log('Tags input value:', e.target.value);
+                          setTagsInput(e.target.value);
+                        }}
+                        onBlur={() => {
+                          const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                          console.log('Tags parsed on blur:', tags);
                           setEditingItem({
                             ...editingItem,
-                            [key]: tags
+                            tags
                           });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                            console.log('Tags parsed on Enter:', tags);
+                            setEditingItem({
+                              ...editingItem,
+                              tags
+                            });
+                          }
                         }}
                         placeholder="yatırım, strateji, 2024"
                         className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
                       />
                     </div>
                   );
-                }
-
-                if (key === 'metaKeywords' && Array.isArray(editingItem[key])) {
+                } 
+                
+                if (key === 'metaKeywords') {
                   return (
                     <div key={key}>
-                      <label className="block text-gray-400 mb-2 capitalize">Meta Keywords (virgülle ayırın)</label>
+                      <label className="block text-gray-400 mb-2 capitalize">
+                        Meta Keywords (virgülle ayırın) - {editingItem[key]?.length || 0} kelime
+                      </label>
                       <input
                         type="text"
-                        value={editingItem[key].join(', ')}
+                        value={metaKeywordsInput}
                         onChange={(e) => {
-                          const keywords = e.target.value.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                          console.log('MetaKeywords input value:', e.target.value);
+                          setMetaKeywordsInput(e.target.value);
+                        }}
+                        onBlur={() => {
+                          const keywords = metaKeywordsInput.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                          console.log('MetaKeywords parsed on blur:', keywords);
                           setEditingItem({
                             ...editingItem,
-                            [key]: keywords
+                            metaKeywords: keywords
                           });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const keywords = metaKeywordsInput.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                            console.log('MetaKeywords parsed on Enter:', keywords);
+                            setEditingItem({
+                              ...editingItem,
+                              metaKeywords: keywords
+                            });
+                          }
                         }}
                         placeholder="yatırım, finans, blog"
                         className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
                       />
                     </div>
                   );
-                }
-
-                if (key === 'images' && Array.isArray(editingItem[key])) {
+                } 
+                
+                if (key === 'images') {
                   return (
                     <div key={key}>
-                      <label className="block text-gray-400 mb-2 capitalize">İçerik Resimleri (virgülle ayırın)</label>
+                      <label className="block text-gray-400 mb-2 capitalize">
+                        İçerik Resimleri (virgülle ayırın) - {editingItem[key]?.length || 0} resim
+                      </label>
                       <input
                         type="text"
-                        value={editingItem[key].join(', ')}
+                        value={imagesInput}
                         onChange={(e) => {
-                          const urls = e.target.value.split(',').map(url => url.trim()).filter(url => url.length > 0);
+                          console.log('Images input value:', e.target.value);
+                          setImagesInput(e.target.value);
+                        }}
+                        onBlur={() => {
+                          const urls = imagesInput.split(',').map(url => url.trim()).filter(url => url.length > 0);
+                          console.log('Images parsed on blur:', urls);
                           setEditingItem({
                             ...editingItem,
-                            [key]: urls
+                            images: urls
                           });
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const urls = imagesInput.split(',').map(url => url.trim()).filter(url => url.length > 0);
+                            console.log('Images parsed on Enter:', urls);
+                            setEditingItem({
+                              ...editingItem,
+                              images: urls
+                            });
+                          }
                         }}
                         placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
                         className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none"
                       />
                     </div>
                   );
-                }
+                } 
 
                 if (key === 'content') {
                   return (
