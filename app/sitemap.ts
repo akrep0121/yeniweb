@@ -15,20 +15,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     {
-      url: 'https://sonerylmaz.vercel.app',
+      url: 'https://soneryilmaz.vercel.app',
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1,
     },
     {
-      url: 'https://sonerylmaz.vercel.app/blog',
+      url: 'https://soneryilmaz.vercel.app/blog',
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.9,
     },
     ...blogUrls,
     {
-      url: 'https://sonerylmaz.vercel.app/#iletisim',
+      url: 'https://soneryilmaz.vercel.app/#iletisim',
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,

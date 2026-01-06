@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = blog.metaTitle || `${blog.title} | Soner Yılmaz`;
+  const title = blog.metaTitle || `${blog.title} | Soner Yılmaz | Bireysel Yatırımcı & Piyasa Gözlemcisi`;
   const description = blog.metaDescription || blog.excerpt || `${blog.title} - Yatırım, finans ve piyasa analizi üzerine yazı`;
 
   return {
@@ -94,21 +94,21 @@ export default async function BlogPost({ params }: PageProps) {
     author: {
       '@type': 'Person',
       name: blog.author,
-      url: 'https://yeniweb.vercel.app'
+      url: 'https://soneryilmaz.vercel.app'
     },
     publisher: {
       '@type': 'Organization',
-      name: 'Soner Yılmaz',
+      name: 'Soner Yılmaz | Bireysel Yatırımcı & Piyasa Gözlemcisi',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://yeniweb.vercel.app/logo.png'
+        url: 'https://soneryilmaz.vercel.app/logo.png'
       }
     },
     datePublished: blog.publishedAt,
     dateModified: blog.publishedAt,
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://yeniweb.vercel.app/blog/${blog.slug}`
+      '@id': `https://soneryilmaz.vercel.app/blog/${blog.slug}`
     },
     keywords: blog.metaKeywords?.join(', ') || blog.tags?.join(', ') || '',
     articleSection: blog.category
